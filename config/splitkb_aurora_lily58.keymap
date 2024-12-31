@@ -22,7 +22,7 @@
                        &kp GRAVE   &kp LEFT_ALT  &kp LEFT_COMMAND  &kp BACKSPACE      &kp SPACE          &mo 1       &mo 2   &kp RIGHT_ALT
             >;
 
-            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
         };
 
         lower_layer {
@@ -34,7 +34,7 @@
                                         &trans  &trans  &trans      &trans    &trans    &trans  &trans  &trans
             >;
 
-            sensor-bindings = <&inc_dec_kp C_BRI_UP C_BRI_DN ;
+            sensor-bindings = <&inc_dec_kp C_BRI_UP C_BRI_DN>;
         };
 
         raise_layer {
@@ -46,7 +46,7 @@
                                   &trans     &trans      &trans          &trans                   &trans           &trans                          &trans           &trans
             >;
 
-            sensor-bindings = <&inc_dec_kp PG_UP PG_DN;
+            sensor-bindings = <&inc_dec_kp PG_UP PG_DN>;
         };
     };
 };

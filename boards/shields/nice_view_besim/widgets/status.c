@@ -32,7 +32,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/split/central.h>
 #endif
 
-#include "mascot_widget.h"
+#include "keys_widget.h"
 #include "status.h"
 
 static sys_slist_t widgets = SYS_SLIST_STATIC_INIT(&widgets);
@@ -293,8 +293,8 @@ int zmk_widget_status_init(struct zmk_widget_status *widget, lv_obj_t *parent) {
     lv_canvas_set_buffer(bottom, widget->cbuf_bottom, CANVAS_SIZE, CANVAS_SIZE,
                          CANVAS_COLOR_FORMAT);
 
-    // child 2: mascot
-    zmk_widget_mascot_init(widget->obj, BAND_MIDDLE_X);
+    // child 2: pressed keys
+    zmk_widget_keys_init(widget->obj, BAND_MIDDLE_X);
 
     sys_slist_append(&widgets, &widget->node);
 

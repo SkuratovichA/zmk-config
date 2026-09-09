@@ -16,3 +16,12 @@ Errors hit in this project and how they were fixed. Check here before starting a
 - **Local docker builds need `west zephyr-export` inside the same `docker run`** (the CMake package
   registry lives in the container's home, which `--rm` throws away); ZMK's `find_package(Zephyr)`
   does not use `ZEPHYR_BASE`.
+- **`CONFIG_EC11_TRIGGER_OWN_THREAD=y` froze the keyboard when the encoder was used.** The EC11
+  "own thread" is cooperative with a 1 KB stack and ZMK runs the entire sensor → behavior → HID →
+  Bluetooth chain synchronously on it (the system work queue has 3 KB for the same work); the
+  firmware has no stack guard or reset-on-fatal, so an overflow just hangs. Keep the documented
+  `CONFIG_EC11_TRIGGER_GLOBAL_THREAD=y`. More generally: do not ship untested threading/BLE-buffer
+  tuning to a keyboard that has no serial log; change one thing at a time.
+- **There are three ZMK repos**: `zmk-config` (canonical, this one), `zmk-config-new`, and
+  `zmk-config-lily58-pro` (the layout the user considers "normal": Shift on the home row, Ctrl
+  below, layer 1 leaves ESC/Enter transparent, layer 2 has F-keys on the home row).

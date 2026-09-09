@@ -10,7 +10,7 @@
 
 #include "util.h"
 
-LV_IMG_DECLARE(mascot_charge);
+LV_IMG_DECLARE(charge_glyph);
 
 void rotate_canvas(lv_obj_t *canvas) {
     uint8_t *buf = lv_canvas_get_draw_buf(canvas)->data;
@@ -50,7 +50,7 @@ void draw_battery_row(lv_obj_t *canvas, lv_coord_t y, const char *label, uint8_t
     if (charging) {
         lv_draw_image_dsc_t img_dsc;
         lv_draw_image_dsc_init(&img_dsc);
-        canvas_draw_img(canvas, 18, y, &mascot_charge, &img_dsc);
+        canvas_draw_img(canvas, 18, y, &charge_glyph, &img_dsc);
     }
 
     char text[6];

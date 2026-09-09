@@ -1,5 +1,6 @@
 /*
  * besimboard — splitkb Aurora Lily58, ZMK.
+ * Layout follows zmk-config-lily58-pro, with vim arrows and the encoder added.
  *
  * SPDX-License-Identifier: MIT
  */
@@ -8,11 +9,10 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/outputs.h>
-#include <dt-bindings/zmk/ext_power.h>
 
-#define BASE   0
-#define LOWER  1
-#define SYSTEM 2
+#define BASE  0
+#define LOWER 1
+#define FN    2
 
 /* macOS shortcuts */
 #define MAC_LOCK LC(LG(Q))
@@ -26,10 +26,10 @@
  * i.e. exactly one trigger per detent. If a click ever moves two steps (or none),
  * tune it here, e.g. `&sensors { triggers-per-rotation = <10>; };`.
  *
- * `enc_kp` is `&inc_dec_kp` with a longer tap: the stock 5 ms tap lets a fast
- * spin offer ~400 HID reports/s, more than Bluetooth can carry, and the overflow
- * then drops reports (which on macOS leaves "volume up" stuck). 10 ms halves
- * the burst rate; the .conf widens the BLE queue for the rest.
+ * `enc_kp` is `&inc_dec_kp` with a longer tap (10 ms instead of 5): a fast spin
+ * then offers at most ~200 HID reports/s, which Bluetooth can carry, so the
+ * report queue no longer overflows and drops releases (which is what made the
+ * Mac's volume jump).
  *
  * Direction: on this build the FIRST binding fires for counter-clockwise and the
  * SECOND for clockwise. If your encoder turns the other way, swap both.
@@ -49,12 +49,18 @@
 
         base_layer {
             display-name = "BASE";
+            // ------------------------------------------------------------------------------------------------------------
+            // |  ESC   |  1  |  2  |  3   |  4   |  5   |                    |  6   |  7    |  8    |  9   |   0   |   -   |
+            // |  TAB   |  Q  |  W  |  E   |  R   |  T   |                    |  Y   |  U    |  I    |  O   |   P   |   \   |
+            // | SHIFT  |  A  |  S  |  D   |  F   |  G   |                    |  H   |  J    |  K    |  L   |   ;   |   '   |
+            // | CTRL   |  Z  |  X  |  C   |  V   |  B   | ENC:PLAY |  |  ]  |  N   |  M    |  ,    |  .   |   /   | ENTER |
+            //                     |  `   | ALT  | CMD  |  BSPC    |  | SPC | LOWER|  FN   | RALT  |
             bindings = <
-&kp ESC           &kp N1   &kp N2   &kp N3   &kp N4    &kp N5                                        &kp N6  &kp N7     &kp N8     &kp N9    &kp N0      &kp MINUS
-&kp TAB           &kp Q    &kp W    &kp E    &kp R     &kp T                                         &kp Y   &kp U      &kp I      &kp O     &kp P       &kp BACKSLASH
-&kp LEFT_CONTROL  &kp A    &kp S    &kp D    &kp F     &kp G                                         &kp H   &kp J      &kp K      &kp L     &kp SEMI    &kp SQT
-&kp LSHFT         &kp Z    &kp X    &kp C    &kp V     &kp B       &kp C_PLAY_PAUSE   &kp RBKT       &kp N   &kp M      &kp COMMA  &kp DOT   &kp FSLH    &kp RET
-                       &kp GRAVE   &kp LEFT_ALT  &kp LEFT_COMMAND  &kp BACKSPACE      &kp SPACE          &mo LOWER   &mo SYSTEM   &kp RIGHT_ALT
+&kp ESC         &kp N1  &kp N2  &kp N3     &kp N4    &kp N5                                            &kp N6  &kp N7  &kp N8         &kp N9   &kp N0    &kp MINUS
+&kp TAB         &kp Q   &kp W   &kp E      &kp R     &kp T                                             &kp Y   &kp U   &kp I          &kp O    &kp P     &kp BACKSLASH
+&kp LEFT_SHIFT  &kp A   &kp S   &kp D      &kp F     &kp G                                             &kp H   &kp J   &kp K          &kp L    &kp SEMI  &kp SQT
+&kp LCTRL       &kp Z   &kp X   &kp C      &kp V     &kp B             &kp C_PLAY_PAUSE  &kp RBKT      &kp N   &kp M   &kp COMMA      &kp DOT  &kp FSLH  &kp ENTER
+                                &kp GRAVE  &kp LALT  &kp LEFT_COMMAND  &kp BACKSPACE     &kp SPACE     &mo LOWER   &mo FN   &kp RIGHT_ALT
             >;
 
             // encoder: volume, press: play/pause
@@ -63,26 +69,43 @@
 
         lower_layer {
             display-name = "LOWER";
+            // ------------------------------------------------------------------------------------------------------------
+            // |        |     |     |      |      |      |                    |      |       |       |      |       |       |
+            // |   `    |  1  |  2  |  3   |  4   |  5   |                    |  6   |  7    |  8    |  9   |   0   |   -   |
+            // |        |  (  |  [  |  ]   |  )   |      |                    |  <-  |   v   |   ^   |  ->  |       |   =   |
+            // |        |  `  |     |      |      |      | ENC:MUTE |  |     | CAPS |   -   |   =   |      |       |       |
+            //                     |      |      |      |          |  |     |      |       |       |
             bindings = <
-&kp F1    &kp F2      &kp F3      &kp F4      &kp F5      &kp F6                        &kp F7          &kp F8          &kp F9          &kp F10           &kp F11     &kp F12
-&trans    &kp N1      &kp N2      &kp N3      &kp N4      &kp N5                        &kp N6          &kp N7          &kp N8          &kp N9            &kp N0      &kp MINUS
-&trans    &kp LPAR    &kp LBKT    &kp RBKT    &kp RPAR    &none                         &kp LEFT_ARROW  &kp DOWN_ARROW  &kp UP_ARROW    &kp RIGHT_ARROW   &none       &kp EQUAL
-&trans    &kp GRAVE   &none       &none       &trans      &trans    &kp C_MUTE  &none   &kp CAPSLOCK    &kp MINUS       &kp COMMA       &kp DOT           &kp SLASH   &trans
-                                        &trans  &trans  &trans      &trans    &trans    &trans  &trans  &trans
+&trans     &trans     &trans    &trans    &trans    &trans                          &trans        &trans     &trans          &trans        &trans     &trans
+&kp GRAVE  &kp N1     &kp N2    &kp N3    &kp N4    &kp N5                          &kp N6        &kp N7     &kp N8          &kp N9        &kp N0     &kp MINUS
+&trans     &kp LPAR   &kp LBKT  &kp RBKT  &kp RPAR  &trans                          &kp LEFT      &kp DOWN   &kp UP          &kp RIGHT     &trans     &kp EQUAL
+&trans     &kp GRAVE  &trans    &trans    &trans    &trans  &kp C_MUTE     &trans   &kp CAPSLOCK  &kp MINUS  &kp EQUAL       &trans        &trans     &trans
+                                &trans    &trans    &trans  &trans         &trans   &trans        &trans     &trans
             >;
 
             // encoder: screen brightness, press: mute
             sensor-bindings = <&enc_kp C_BRI_DN C_BRI_UP>;
         };
 
-        system_layer {
-            display-name = "SYSTEM";
+        fn_layer {
+            display-name = "FN";
+            // ------------------------------------------------------------------------------------------------------------
+            // | BT CLR | BT1 | BT2 | BT3  | BT4  | BT5  |                    |      |       |       |      |       | BOOT  |
+            // | BOOT   | DC1 | DC2 | DC3  | DC4  | DC5  |                    | USB  |  BLE  |  TOG  |UNLOCK|       |CLR ALL|
+            // |  F1    | F2  | F3  |  F4  |  F5  |  F6  |                    |  F7  |  F8   |  F9   | F10  |  F11  |  F12  |
+            // |        |     |     |      |      |      | ENC:LOCK |  |     |      |       |       |      |       |       |
+            //                     |      |      |      |          |  |     |      |       |       |
+            //
+            // BT1-5 select a Bluetooth profile, DC1-5 disconnect one, BT CLR forgets the
+            // pairing of the current profile, CLR ALL forgets all of them. BOOT puts that
+            // half into the bootloader (left: TAB key, right: MINUS key). UNLOCK opens
+            // the keyboard for ZMK Studio (zmk.studio, over USB or Bluetooth, left half).
             bindings = <
-&bootloader  &bt BT_SEL 0     &bt BT_SEL 1     &bt BT_SEL 2     &bt BT_SEL 3     &bt BT_SEL 4                                     &ext_power EP_TOG   &studio_unlock   &none            &none            &none            &bootloader
-&none        &bt BT_DISC 0    &bt BT_DISC 1    &bt BT_DISC 2    &bt BT_DISC 3    &bt BT_DISC 4                                    &none               &none            &none            &none            &none            &none
-&none        &out OUT_USB     &out OUT_BLE     &out OUT_TOG     &none            &none                                            &bt BT_PRV          &bt BT_NXT       &none            &none            &none            &none
-&none        &none            &none            &none            &none            &none    &kp MAC_LOCK   &bt BT_CLR              &none               &none            &none            &none            &none            &bt BT_CLR_ALL
-                                        &trans     &trans      &trans          &trans                   &trans           &trans                          &trans           &trans
+&bt BT_CLR   &bt BT_SEL 0   &bt BT_SEL 1   &bt BT_SEL 2   &bt BT_SEL 3   &bt BT_SEL 4                          &trans        &trans        &trans        &trans          &trans   &bootloader
+&bootloader  &bt BT_DISC 0  &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4                         &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &studio_unlock  &trans   &bt BT_CLR_ALL
+&kp F1       &kp F2         &kp F3         &kp F4         &kp F5         &kp F6                                &kp F7        &kp F8        &kp F9        &kp F10         &kp F11  &kp F12
+&trans       &trans         &trans         &trans         &trans         &trans   &kp MAC_LOCK     &trans      &trans        &trans        &trans        &trans          &trans   &trans
+                                           &trans         &trans         &trans   &trans           &trans      &trans        &trans        &trans
             >;
 
             // encoder: undo / redo, press: lock the Mac

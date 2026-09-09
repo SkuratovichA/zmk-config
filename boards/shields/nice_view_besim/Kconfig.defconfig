@@ -1,0 +1,61 @@
+# SPDX-License-Identifier: MIT
+#
+# besimboard nice!view: same display settings as the stock ZMK nice_view shield,
+# plus our own status widget (both batteries, BT profile, layer, mascot).
+
+if SHIELD_NICE_VIEW_BESIM
+
+config LS0XX_VCOM_THREAD_PRIO
+    default 11
+
+config LV_Z_VDB_SIZE
+    default 100
+
+config LV_DPI_DEF
+    default 161
+
+config LV_Z_BITS_PER_PIXEL
+    default 1
+
+choice LV_COLOR_DEPTH
+    default LV_COLOR_DEPTH_1
+endchoice
+
+choice ZMK_DISPLAY_WORK_QUEUE
+    default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
+endchoice
+
+choice ZMK_DISPLAY_STATUS_SCREEN
+    default ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+endchoice
+
+# Stock nice_view uses 8192 for its custom screen; we draw a little more (two
+# battery rows, profile dots, an image object), so leave generous headroom.
+config LV_Z_MEM_POOL_SIZE
+    default 16384
+
+config ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+    imply NICE_VIEW_BESIM_WIDGET_STATUS
+
+config NICE_VIEW_BESIM_WIDGET_STATUS
+    bool "besimboard nice!view status widget"
+    select LV_FONT_MONTSERRAT_12
+    select LV_FONT_MONTSERRAT_14
+    select LV_FONT_MONTSERRAT_16
+    select LV_FONT_UNSCII_8
+    select LV_USE_IMAGE
+    select LV_USE_CANVAS
+
+config NICE_VIEW_BESIM_WIDGET_INVERTED
+    bool "Invert status widget colors"
+
+if ZMK_SPLIT_ROLE_CENTRAL
+
+# Lets the left (central) half receive the right half's battery level so both
+# can be shown on the left display.
+config ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING
+    default y
+
+endif # ZMK_SPLIT_ROLE_CENTRAL
+
+endif # SHIELD_NICE_VIEW_BESIM

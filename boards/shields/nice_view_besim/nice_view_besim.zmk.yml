@@ -1,0 +1,8 @@
+file_format: "1"
+id: nice_view_besim
+name: besimboard nice!view
+type: shield
+url: https://github.com/SkuratovichA/zmk-config
+requires: [nice_view_header]
+features:
+  - display

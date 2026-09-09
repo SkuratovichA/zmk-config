@@ -1,26 +1,25 @@
 # This file generates the GitHub Actions matrix.
-# For simple board + shield combinations, add them to the top level board and
-# shield arrays, for more control, add individual board + shield combinations
-# to the `include` property. You can also use the `cmake-args` property to
-# pass flags to the build command and `artifact-name` to assign a name to
-# distinguish build outputs from each other:
 #
-# board: [ "nice_nano_v2" ]
-# shield: [ "corne_left", "corne_right" ]
-# include:
-#   - board: bdn9_rev2
-#   - board: nice_nano_v2
-#     shield: reviung41
-#   - board: nice_nano_v2
-#     shield: corne_left
-#     cmake-args: -DCONFIG_ZMK_USB_LOGGING=y
-#     artifact-name: corne_left_with_logging
+# besimboard: splitkb Aurora Lily58, nice!nano v2 on both halves, nice!view on
+# both halves (custom status screen: boards/shields/nice_view_besim).
 #
+# Board naming follows ZMK's Zephyr 4.1 scheme: `nice_nano//zmk` is the
+# nice!nano v2 (revision 2.0.0 is the default); v1 would be `nice_nano@1//zmk`.
+#
+# Artifacts: besimboard_left.uf2, besimboard_right.uf2 and
+# besimboard_settings_reset.uf2 (flash the latter to BOTH halves to wipe every
+# Bluetooth bond, including the link between the halves, then re-flash the
+# normal firmware).
 ---
 include:
-  - board: nice_nano_v2
-    shield: splitkb_aurora_lily58_left nice_view_adapter nice_view
+  - board: nice_nano//zmk
+    shield: splitkb_aurora_lily58_left nice_view_adapter nice_view_besim
     snippet: studio-rpc-usb-uart
     cmake-args: -DCONFIG_ZMK_STUDIO=y
-  - board: nice_nano_v2
-    shield: splitkb_aurora_lily58_right nice_view_adapter nice_view
+    artifact-name: besimboard_left
+  - board: nice_nano//zmk
+    shield: splitkb_aurora_lily58_right nice_view_adapter nice_view_besim
+    artifact-name: besimboard_right
+  - board: nice_nano//zmk
+    shield: settings_reset
+    artifact-name: besimboard_settings_reset

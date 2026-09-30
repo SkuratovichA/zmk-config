@@ -51,7 +51,7 @@ void keys_core_set_redraw_work(struct k_work *work);
 
 /*
  * Called on the event thread for every key press, after the binding was
- * resolved. clock_key tells whether the key is bound to the besim clock
+ * resolved. clock_key tells whether the key is bound to the shared clock
  * behaviour. It must not touch LVGL. NULL, the default, disables the call.
  */
 typedef void (*keys_core_press_cb_t)(bool clock_key);

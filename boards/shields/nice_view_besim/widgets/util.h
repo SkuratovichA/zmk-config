@@ -10,16 +10,16 @@
 #include <lvgl.h>
 #include <zmk/endpoints.h>
 
-#include <besim/draw.h>
-#include <besim/role.h>
-#include <besim/status_state.h>
+#include <shared/draw.h>
+#include <shared/role.h>
+#include <shared/status_state.h>
 
-#define NICEVIEW_PROFILE_COUNT BESIM_PROFILE_COUNT
-#define NICEVIEW_IS_CENTRAL BESIM_IS_CENTRAL
+#define NICEVIEW_PROFILE_COUNT SHARED_PROFILE_COUNT
+#define NICEVIEW_IS_CENTRAL SHARED_IS_CENTRAL
 
 #define CANVAS_SIZE 68
-#define CANVAS_COLOR_FORMAT BESIM_CANVAS_COLOR_FORMAT // smallest type supported by sw_rotate
-#define CANVAS_BUF_SIZE BESIM_CANVAS_BUF_SIZE(CANVAS_SIZE, CANVAS_SIZE)
+#define CANVAS_COLOR_FORMAT SHARED_CANVAS_COLOR_FORMAT // smallest type supported by sw_rotate
+#define CANVAS_BUF_SIZE SHARED_CANVAS_BUF_SIZE(CANVAS_SIZE, CANVAS_SIZE)
 
 /*
  * The nice!view is a 160x68 panel mounted vertically: memory x=160 is the physical

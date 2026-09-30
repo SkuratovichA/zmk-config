@@ -10,8 +10,8 @@
 #include <zephyr/kernel.h>
 #include <lvgl.h>
 
-#include <besim/draw.h>
-#include <besim/keys_core.h>
+#include <shared/draw.h>
+#include <shared/keys_core.h>
 
 #include "layout.h"
 #include "keys_view.h"
@@ -31,12 +31,12 @@ struct cap_shown {
 };
 
 static lv_obj_t *cap_canvas[KEYS_SLOTS];
-static uint8_t cap_buf[KEYS_SLOTS][BESIM_CANVAS_BUF_SIZE(OLED_CAP_CANVAS_W, OLED_CAP_CANVAS_H)]
+static uint8_t cap_buf[KEYS_SLOTS][SHARED_CANVAS_BUF_SIZE(OLED_CAP_CANVAS_W, OLED_CAP_CANVAS_H)]
     __aligned(4);
 static struct cap_shown cap_shown[KEYS_SLOTS];
 
 static lv_obj_t *idle_glyph;
-static uint8_t idle_glyph_buf[BESIM_CANVAS_BUF_SIZE(OLED_IDLE_GLYPH_W, OLED_IDLE_GLYPH_H)]
+static uint8_t idle_glyph_buf[SHARED_CANVAS_BUF_SIZE(OLED_IDLE_GLYPH_W, OLED_IDLE_GLYPH_H)]
     __aligned(4);
 static bool idle_glyph_hidden;
 
@@ -152,7 +152,7 @@ int oled_keys_view_init(lv_obj_t *parent) {
             return -ENOMEM;
         }
         lv_canvas_set_buffer(cap_canvas[i], cap_buf[i], OLED_CAP_CANVAS_W, OLED_CAP_CANVAS_H,
-                             BESIM_CANVAS_COLOR_FORMAT);
+                             SHARED_CANVAS_COLOR_FORMAT);
         lv_obj_set_pos(cap_canvas[i], (i % OLED_KEYS_COLS) * OLED_CAP_PITCH_X,
                        OLED_KEYS_Y + (i / OLED_KEYS_COLS) * OLED_CAP_PITCH_Y);
         lv_canvas_fill_bg(cap_canvas[i], LVGL_BACKGROUND, LV_OPA_COVER);
@@ -165,7 +165,7 @@ int oled_keys_view_init(lv_obj_t *parent) {
         return -ENOMEM;
     }
     lv_canvas_set_buffer(idle_glyph, idle_glyph_buf, OLED_IDLE_GLYPH_W, OLED_IDLE_GLYPH_H,
-                         BESIM_CANVAS_COLOR_FORMAT);
+                         SHARED_CANVAS_COLOR_FORMAT);
     lv_obj_set_pos(idle_glyph, OLED_IDLE_GLYPH_X, OLED_IDLE_GLYPH_Y);
     draw_idle_glyph();
     idle_glyph_hidden = false;

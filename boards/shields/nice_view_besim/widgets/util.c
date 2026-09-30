@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: MIT
  *
  * Canvas rotation for the besimboard nice!view status screen. The drawing helpers live in
- * src/besim/draw.c.
+ * src/shared/draw.c.
  */
 
 #include <string.h>

@@ -3,26 +3,58 @@
 # Code shared by the status screens of this config. A shield selects the parts
 # its screen needs. Only the inversion is meant to be set by hand.
 
-config BESIM_DISPLAY_INVERTED
-    bool "Invert the colours of the besim status screens"
+config SHARED_DISPLAY_INVERTED
+    bool "Invert the colours of the shared status screens"
 
-config BESIM_DRAW
+config SHARED_DRAW
     bool
     select LV_USE_CANVAS
     select LV_USE_IMAGE
     select LV_FONT_UNSCII_8
     select LV_FONT_MONTSERRAT_12
 
-config BESIM_KEYS_CORE
+config SHARED_KEYS_CORE
     bool
 
-config BESIM_STATUS_STATE
+config SHARED_STATUS_STATE
     bool
 
-config BESIM_CLOCK
+config SHARED_CLOCK
     bool
 
-config BESIM_BEHAVIOR_CLOCK
+config SHARED_BEHAVIOR_CLOCK
     bool
     default y
-    depends on DT_HAS_ZMK_BEHAVIOR_BESIM_CLOCK_ENABLED && BESIM_CLOCK
+    depends on DT_HAS_ZMK_BEHAVIOR_OLED_CLOCK_ENABLED && SHARED_CLOCK
+
+config SHARED_KEY_RGB
+    bool "Light a pressed key's LED in a random colour and fade it out"
+    default y
+    depends on DT_HAS_SKURATOVICH_KEY_RGB_ENABLED && ZMK_RGB_UNDERGLOW
+    help
+      Needs a skuratovich,key-rgb node in the devicetree (normally in the keymap)
+      that maps key positions to LEDs of the chosen zmk,underglow strip. The
+      effect runs while ZMK's underglow is off; with the underglow on, ZMK's
+      effect owns the whole strip.
+
+if SHARED_KEY_RGB
+
+config SHARED_KEY_RGB_FADE_MS
+    int "Milliseconds a pressed key's LED takes to fade out"
+    default 1000
+    range 50 10000
+
+config SHARED_KEY_RGB_TICK_MS
+    int "Milliseconds between two frames of the fade"
+    default 25
+    range 5 500
+
+config SHARED_KEY_RGB_RAIL_OFF_MS
+    int "Milliseconds after the last fade before the LED power rail goes off again"
+    default 2000
+    range 100 60000
+    help
+      Only on a half where ZMK_RGB_UNDERGLOW_EXT_POWER is on, where the rail
+      is off whenever the underglow is off.
+
+endif # SHARED_KEY_RGB

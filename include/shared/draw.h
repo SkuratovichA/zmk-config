@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * Drawing helpers shared by the besim status screens: colours, canvas
+ * Drawing helpers shared by the shared status screens: colours, canvas
  * buffers, and the battery row and key cap that both screens show.
  * Based on ZMK's stock nice_view widgets (LVGL 9).
  */
@@ -12,15 +12,15 @@
 #include <zephyr/sys/util.h>
 
 /* L8 is the smallest canvas format that sw_rotate supports on the nice!view. */
-#define BESIM_CANVAS_COLOR_FORMAT LV_COLOR_FORMAT_L8
-#define BESIM_CANVAS_BUF_SIZE(w, h)                                                                \
-    LV_CANVAS_BUF_SIZE((w), (h), LV_COLOR_FORMAT_GET_BPP(BESIM_CANVAS_COLOR_FORMAT),               \
+#define SHARED_CANVAS_COLOR_FORMAT LV_COLOR_FORMAT_L8
+#define SHARED_CANVAS_BUF_SIZE(w, h)                                                                \
+    LV_CANVAS_BUF_SIZE((w), (h), LV_COLOR_FORMAT_GET_BPP(SHARED_CANVAS_COLOR_FORMAT),               \
                        LV_DRAW_BUF_STRIDE_ALIGN)
 
 #define LVGL_BACKGROUND                                                                            \
-    (IS_ENABLED(CONFIG_BESIM_DISPLAY_INVERTED) ? lv_color_black() : lv_color_white())
+    (IS_ENABLED(CONFIG_SHARED_DISPLAY_INVERTED) ? lv_color_black() : lv_color_white())
 #define LVGL_FOREGROUND                                                                            \
-    (IS_ENABLED(CONFIG_BESIM_DISPLAY_INVERTED) ? lv_color_white() : lv_color_black())
+    (IS_ENABLED(CONFIG_SHARED_DISPLAY_INVERTED) ? lv_color_white() : lv_color_black())
 
 void init_label_dsc(lv_draw_label_dsc_t *label_dsc, lv_color_t color, const lv_font_t *font,
                     lv_text_align_t align);

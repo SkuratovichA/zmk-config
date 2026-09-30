@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * Commands of the besim clock behaviour, for a keymap: &clk CLK_SHOW.
+ * Commands of the shared clock behaviour, for a keymap: &clk CLK_SHOW.
  */
 
 #pragma once

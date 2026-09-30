@@ -117,7 +117,7 @@ static void draw_bottom(lv_obj_t *widget, const struct status_state *state) {
 /* Battery of this half ------------------------------------------------- */
 
 static void set_battery_status(struct zmk_widget_status *widget,
-                               struct besim_battery_status_state state) {
+                               struct shared_battery_status_state state) {
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
     widget->state.charging = state.usb_present;
 #endif
@@ -125,13 +125,13 @@ static void set_battery_status(struct zmk_widget_status *widget,
     draw_top(widget->obj, &widget->state);
 }
 
-static void battery_status_update_cb(struct besim_battery_status_state state) {
+static void battery_status_update_cb(struct shared_battery_status_state state) {
     struct zmk_widget_status *widget;
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_battery_status(widget, state); }
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct besim_battery_status_state,
-                            battery_status_update_cb, besim_battery_status_get_state)
+ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct shared_battery_status_state,
+                            battery_status_update_cb, shared_battery_status_get_state)
 ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
 ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
@@ -142,14 +142,14 @@ ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
 #if IS_ENABLED(CONFIG_ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING)
 
 static void set_peripheral_battery_status(struct zmk_widget_status *widget,
-                                          struct besim_peripheral_battery_status_state state) {
+                                          struct shared_peripheral_battery_status_state state) {
     widget->state.peripheral_known = state.known;
     widget->state.peripheral_battery = state.level;
     draw_top(widget->obj, &widget->state);
 }
 
 static void
-peripheral_battery_status_update_cb(struct besim_peripheral_battery_status_state state) {
+peripheral_battery_status_update_cb(struct shared_peripheral_battery_status_state state) {
     struct zmk_widget_status *widget;
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) {
         set_peripheral_battery_status(widget, state);
@@ -157,9 +157,9 @@ peripheral_battery_status_update_cb(struct besim_peripheral_battery_status_state
 }
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_battery_status,
-                            struct besim_peripheral_battery_status_state,
+                            struct shared_peripheral_battery_status_state,
                             peripheral_battery_status_update_cb,
-                            besim_peripheral_battery_status_get_state)
+                            shared_peripheral_battery_status_get_state)
 ZMK_SUBSCRIPTION(widget_peripheral_battery_status, zmk_peripheral_battery_state_changed);
 
 #endif /* CONFIG_ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING */
@@ -167,7 +167,7 @@ ZMK_SUBSCRIPTION(widget_peripheral_battery_status, zmk_peripheral_battery_state_
 /* Output / Bluetooth profile ------------------------------------------- */
 
 static void set_output_status(struct zmk_widget_status *widget,
-                              const struct besim_output_status_state *state) {
+                              const struct shared_output_status_state *state) {
     widget->state.selected_endpoint = state->selected_endpoint;
     widget->state.active_profile_index = state->active_profile_index;
     widget->state.active_profile_connected = state->active_profile_connected;
@@ -179,13 +179,13 @@ static void set_output_status(struct zmk_widget_status *widget,
     draw_top(widget->obj, &widget->state);
 }
 
-static void output_status_update_cb(struct besim_output_status_state state) {
+static void output_status_update_cb(struct shared_output_status_state state) {
     struct zmk_widget_status *widget;
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_output_status(widget, &state); }
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct besim_output_status_state,
-                            output_status_update_cb, besim_output_status_get_state)
+ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct shared_output_status_state,
+                            output_status_update_cb, shared_output_status_get_state)
 ZMK_SUBSCRIPTION(widget_output_status, zmk_endpoint_changed);
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
 ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
@@ -197,19 +197,19 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 /* Layer ---------------------------------------------------------------- */
 
 static void set_layer_status(struct zmk_widget_status *widget,
-                             struct besim_layer_status_state state) {
+                             struct shared_layer_status_state state) {
     widget->state.layer_index = state.index;
     widget->state.layer_label = state.label;
     draw_bottom(widget->obj, &widget->state);
 }
 
-static void layer_status_update_cb(struct besim_layer_status_state state) {
+static void layer_status_update_cb(struct shared_layer_status_state state) {
     struct zmk_widget_status *widget;
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_layer_status(widget, state); }
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct besim_layer_status_state,
-                            layer_status_update_cb, besim_layer_status_get_state)
+ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct shared_layer_status_state,
+                            layer_status_update_cb, shared_layer_status_get_state)
 ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
 
 /* ---------------------------------------------------------------------- */

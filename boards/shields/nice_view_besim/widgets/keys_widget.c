@@ -13,7 +13,7 @@
 
 #include <zephyr/kernel.h>
 
-#include <besim/keys_core.h>
+#include <shared/keys_core.h>
 
 #include "keys_widget.h"
 #include "util.h"

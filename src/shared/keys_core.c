@@ -18,7 +18,7 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#include <dt-bindings/besim/clock.h>
+#include <dt-bindings/shared/clock.h>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/hid_usage_pages.h>
 #include <dt-bindings/zmk/outputs.h>
@@ -29,20 +29,20 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #include <zmk/events/position_state_changed.h>
 #include <zmk/keymap.h>
 
-#include <besim/keys_core.h>
-#include <besim/role.h>
+#include <shared/keys_core.h>
+#include <shared/role.h>
 
-#if !BESIM_IS_CENTRAL
+#if !SHARED_IS_CENTRAL
 /*
  * ZMK only compiles keymap.c on the central, so the peripheral extracts the
  * keymap from the devicetree itself (same macros ZMK uses) and shows base-layer
  * labels.
  */
 #include <zmk/matrix.h>
-#define BESIM_KEYMAP_LAYER(node)                                                                   \
+#define SHARED_KEYMAP_LAYER(node)                                                                   \
     {LISTIFY(DT_PROP_LEN(node, bindings), ZMK_KEYMAP_EXTRACT_BINDING, (, ), node)},
 static const struct zmk_behavior_binding keymap_layers[][ZMK_KEYMAP_LEN] = {
-    ZMK_KEYMAP_LAYERS_FOREACH(BESIM_KEYMAP_LAYER)};
+    ZMK_KEYMAP_LAYERS_FOREACH(SHARED_KEYMAP_LAYER)};
 #endif
 
 struct key_slot {
@@ -239,7 +239,7 @@ static bool binding_label(const struct zmk_behavior_binding *binding, char *out,
         out[len - 1] = '\0';
         return true;
     }
-    if (strcmp(dev, "besim_clock") == 0) {
+    if (strcmp(dev, "oled_clock") == 0) {
         const char *label;
         switch (binding->param1) {
         case CLK_SHOW:
@@ -322,7 +322,7 @@ static bool binding_label(const struct zmk_behavior_binding *binding, char *out,
 }
 
 static const struct zmk_behavior_binding *resolve_binding(uint32_t position) {
-#if BESIM_IS_CENTRAL
+#if SHARED_IS_CENTRAL
     for (int index = zmk_keymap_highest_layer_active(); index >= 0; index--) {
         const zmk_keymap_layer_id_t id = zmk_keymap_layer_index_to_id(index);
         if (!zmk_keymap_layer_active(id)) {
@@ -398,7 +398,7 @@ static int keys_position_listener(const zmk_event_t *eh) {
         char label[KEYS_LABEL_MAX];
         const struct zmk_behavior_binding *binding = resolve_binding(ev->position);
         if (press_cb) {
-            press_cb(binding != NULL && strcmp(binding->behavior_dev, "besim_clock") == 0);
+            press_cb(binding != NULL && strcmp(binding->behavior_dev, "oled_clock") == 0);
         }
         if (binding == NULL) {
             strncpy(label, "?", sizeof(label));

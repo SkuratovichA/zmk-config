@@ -9,8 +9,8 @@
 #include <zephyr/sys/util.h>
 #include <lvgl.h>
 
-#include <besim/draw.h>
-#include <besim/role.h>
+#include <shared/draw.h>
+#include <shared/role.h>
 
 #include "layout.h"
 #include "status_view.h"
@@ -21,7 +21,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-BUILD_ASSERT(BESIM_IS_CENTRAL, "the kyria_oled shield belongs on the central half");
+BUILD_ASSERT(SHARED_IS_CENTRAL, "the kyria_oled shield belongs on the central half");
 
 /* A plain container: no theme style, no padding, no scrolling. */
 static lv_obj_t *make_view(lv_obj_t *screen) {

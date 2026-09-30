@@ -20,15 +20,15 @@ config ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
 
 config KYRIA_OLED_WIDGET_STATUS
     bool "Kyria OLED status screen"
-    select BESIM_DRAW
-    select BESIM_KEYS_CORE
-    select BESIM_STATUS_STATE if !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
+    select SHARED_DRAW
+    select SHARED_KEYS_CORE
+    select SHARED_STATUS_STATE if !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
 
 config KYRIA_OLED_CLOCK
     bool "Show a clock after a period without key presses"
     default y
     depends on KYRIA_OLED_WIDGET_STATUS
-    select BESIM_CLOCK
+    select SHARED_CLOCK
 
 if KYRIA_OLED_CLOCK
 

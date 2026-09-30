@@ -1,21 +1,21 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * ZMK behaviour that shows the besim clock and sets its time by hand. Based on
+ * ZMK behaviour that shows the shared clock and sets its time by hand. Based on
  * ZMK's outputs behaviour.
  */
 
-#define DT_DRV_COMPAT zmk_behavior_besim_clock
+#define DT_DRV_COMPAT zmk_behavior_oled_clock
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
 #include <drivers/behavior.h>
 
-#include <dt-bindings/besim/clock.h>
+#include <dt-bindings/shared/clock.h>
 
 #include <zmk/behavior.h>
 
-#include <besim/clock.h>
+#include <shared/clock.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
@@ -68,19 +68,19 @@ static int on_keymap_binding_pressed(struct zmk_behavior_binding *binding,
                                      struct zmk_behavior_binding_event event) {
     switch (binding->param1) {
     case CLK_SHOW:
-        besim_clock_request_show();
+        shared_clock_request_show();
         return ZMK_BEHAVIOR_OPAQUE;
     case CLK_HOUR_INC:
-        besim_clock_adjust_hours(1);
+        shared_clock_adjust_hours(1);
         return ZMK_BEHAVIOR_OPAQUE;
     case CLK_HOUR_DEC:
-        besim_clock_adjust_hours(-1);
+        shared_clock_adjust_hours(-1);
         return ZMK_BEHAVIOR_OPAQUE;
     case CLK_MIN_INC:
-        besim_clock_adjust_minutes(1);
+        shared_clock_adjust_minutes(1);
         return ZMK_BEHAVIOR_OPAQUE;
     case CLK_MIN_DEC:
-        besim_clock_adjust_minutes(-1);
+        shared_clock_adjust_minutes(-1);
         return ZMK_BEHAVIOR_OPAQUE;
     default:
         LOG_ERR("Unknown clock command: %d", binding->param1);

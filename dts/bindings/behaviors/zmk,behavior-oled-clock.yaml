@@ -2,6 +2,6 @@
 
 description: Clock control for the Kyria OLED status screen
 
-compatible: "zmk,behavior-besim-clock"
+compatible: "zmk,behavior-oled-clock"
 
 include: one_param.yaml

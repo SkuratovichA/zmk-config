@@ -25,7 +25,7 @@
 #include <zmk/usb.h>
 
 #ifdef HARNESS_OLED
-#include <besim/clock.h>
+#include <shared/clock.h>
 #include <zmk/activity.h>
 #include <zmk/events/activity_state_changed.h>
 #endif
@@ -203,8 +203,8 @@ static void run_oled_scenario(void) {
     dump_frame("11-idle-clock-unset");
 
     /* 12. the time is set by hand: 09:41 at full contrast, in peek mode */
-    besim_clock_adjust_hours(9);
-    besim_clock_adjust_minutes(41);
+    shared_clock_adjust_hours(9);
+    shared_clock_adjust_minutes(41);
     tick();
     dump_frame("12-clock-set-peek");
 
@@ -230,7 +230,7 @@ static void run_oled_scenario(void) {
 
     /* 17. a clock key: the peek */
     raise_position(1, false);
-    besim_clock_request_show();
+    shared_clock_request_show();
     tick();
     dump_frame("17-peek");
 

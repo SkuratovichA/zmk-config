@@ -3,7 +3,7 @@
  *
  * The keys area of the Kyria OLED screen: the keys being pressed as caps, and
  * a keyboard glyph while there are none. The keys themselves come from
- * <besim/keys_core.h>.
+ * <shared/keys_core.h>.
  */
 
 #pragma once

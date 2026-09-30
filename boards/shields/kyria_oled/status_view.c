@@ -20,20 +20,20 @@
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/split_peripheral_status_changed.h>
 
-#include <besim/draw.h>
-#include <besim/status_state.h>
+#include <shared/draw.h>
+#include <shared/status_state.h>
 
 #include "layout.h"
 #include "status_view.h"
 
 static lv_obj_t *strip_canvas;
-static uint8_t strip_buf[BESIM_CANVAS_BUF_SIZE(OLED_STATUS_W, OLED_STATUS_H)] __aligned(4);
+static uint8_t strip_buf[SHARED_CANVAS_BUF_SIZE(OLED_STATUS_W, OLED_STATUS_H)] __aligned(4);
 
 /* The last state of each listener; the strip is redrawn from these four. */
-static struct besim_battery_status_state battery_state;
-static struct besim_peripheral_battery_status_state peripheral_state;
-static struct besim_output_status_state output_state;
-static struct besim_layer_status_state layer_state;
+static struct shared_battery_status_state battery_state;
+static struct shared_peripheral_battery_status_state peripheral_state;
+static struct shared_output_status_state output_state;
+static struct shared_layer_status_state layer_state;
 
 static void init_hollow_dsc(lv_draw_rect_dsc_t *dsc) {
     init_rect_dsc(dsc, LVGL_FOREGROUND);
@@ -68,7 +68,7 @@ static void draw_profiles(lv_obj_t *canvas) {
     lv_draw_rect_dsc_t hollow_dsc;
     init_hollow_dsc(&hollow_dsc);
 
-    for (int i = 0; i < BESIM_PROFILE_COUNT; i++) {
+    for (int i = 0; i < SHARED_PROFILE_COUNT; i++) {
         lv_coord_t x = OLED_PROFILE_X + i * OLED_PROFILE_PITCH;
         lv_coord_t y = OLED_PROFILE_Y;
 
@@ -123,13 +123,13 @@ static void redraw_strip(void) {
     draw_layer(strip_canvas);
 }
 
-static void set_battery_status(struct besim_battery_status_state state) {
+static void set_battery_status(struct shared_battery_status_state state) {
     battery_state = state;
     redraw_strip();
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct besim_battery_status_state,
-                            set_battery_status, besim_battery_status_get_state)
+ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct shared_battery_status_state,
+                            set_battery_status, shared_battery_status_get_state)
 ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
 ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
@@ -137,15 +137,15 @@ ZMK_SUBSCRIPTION(widget_battery_status, zmk_usb_conn_state_changed);
 
 #if IS_ENABLED(CONFIG_ZMK_SPLIT) && IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 
-static void set_peripheral_battery_status(struct besim_peripheral_battery_status_state state) {
+static void set_peripheral_battery_status(struct shared_peripheral_battery_status_state state) {
     peripheral_state = state;
     redraw_strip();
 }
 
 ZMK_DISPLAY_WIDGET_LISTENER(widget_peripheral_battery_status,
-                            struct besim_peripheral_battery_status_state,
+                            struct shared_peripheral_battery_status_state,
                             set_peripheral_battery_status,
-                            besim_peripheral_battery_status_get_state)
+                            shared_peripheral_battery_status_get_state)
 ZMK_SUBSCRIPTION(widget_peripheral_battery_status, zmk_split_peripheral_status_changed);
 #if IS_ENABLED(CONFIG_ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING)
 ZMK_SUBSCRIPTION(widget_peripheral_battery_status, zmk_peripheral_battery_state_changed);
@@ -153,13 +153,13 @@ ZMK_SUBSCRIPTION(widget_peripheral_battery_status, zmk_peripheral_battery_state_
 
 #endif /* CONFIG_ZMK_SPLIT && CONFIG_ZMK_SPLIT_ROLE_CENTRAL */
 
-static void set_output_status(struct besim_output_status_state state) {
+static void set_output_status(struct shared_output_status_state state) {
     output_state = state;
     redraw_strip();
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct besim_output_status_state,
-                            set_output_status, besim_output_status_get_state)
+ZMK_DISPLAY_WIDGET_LISTENER(widget_output_status, struct shared_output_status_state,
+                            set_output_status, shared_output_status_get_state)
 ZMK_SUBSCRIPTION(widget_output_status, zmk_endpoint_changed);
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
 ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
@@ -168,13 +168,13 @@ ZMK_SUBSCRIPTION(widget_output_status, zmk_usb_conn_state_changed);
 ZMK_SUBSCRIPTION(widget_output_status, zmk_ble_active_profile_changed);
 #endif
 
-static void set_layer_status(struct besim_layer_status_state state) {
+static void set_layer_status(struct shared_layer_status_state state) {
     layer_state = state;
     redraw_strip();
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct besim_layer_status_state,
-                            set_layer_status, besim_layer_status_get_state)
+ZMK_DISPLAY_WIDGET_LISTENER(widget_layer_status, struct shared_layer_status_state,
+                            set_layer_status, shared_layer_status_get_state)
 ZMK_SUBSCRIPTION(widget_layer_status, zmk_layer_state_changed);
 
 int oled_status_view_init(lv_obj_t *parent) {
@@ -183,7 +183,7 @@ int oled_status_view_init(lv_obj_t *parent) {
         return -ENOMEM;
     }
     lv_canvas_set_buffer(strip_canvas, strip_buf, OLED_STATUS_W, OLED_STATUS_H,
-                         BESIM_CANVAS_COLOR_FORMAT);
+                         SHARED_CANVAS_COLOR_FORMAT);
     lv_obj_set_pos(strip_canvas, 0, 0);
     lv_canvas_fill_bg(strip_canvas, LVGL_BACKGROUND, LV_OPA_COVER);
 

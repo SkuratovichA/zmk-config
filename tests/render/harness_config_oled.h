@@ -6,7 +6,7 @@
  * name of the Kyria and the clock settings of the OLED shield. Not applied to LVGL, which is
  * configured by autoconf_lv.h and lv_conf_host.h.
  *
- * CONFIG_BESIM_DISPLAY_INVERTED is left undefined on purpose: the OLED shows the same glyph
+ * CONFIG_SHARED_DISPLAY_INVERTED is left undefined on purpose: the OLED shows the same glyph
  * bitmaps as the Lily, and the polarity is decided by the display, not by the sources.
  */
 

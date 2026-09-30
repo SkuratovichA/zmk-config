@@ -19,8 +19,8 @@
 #include <zmk/event_manager.h>
 #include <zmk/events/activity_state_changed.h>
 
-#include <besim/clock.h>
-#include <besim/keys_core.h>
+#include <shared/clock.h>
+#include <shared/keys_core.h>
 
 #include "clock_view.h"
 #include "view_manager.h"
@@ -81,7 +81,7 @@ static void set_contrast(uint8_t value) {
 
 static void schedule_minute_work(void) {
     k_work_reschedule_for_queue(zmk_display_work_q(), &minute_work,
-                                K_MSEC(besim_clock_ms_to_next_minute()));
+                                K_MSEC(shared_clock_ms_to_next_minute()));
 }
 
 static void idle_enter_handler(struct k_work *work) {
@@ -202,10 +202,10 @@ static int activity_cb(const zmk_event_t *eh) {
 ZMK_LISTENER(oled_view_manager, activity_cb);
 ZMK_SUBSCRIPTION(oled_view_manager, zmk_activity_state_changed);
 
-static void clock_listener(enum besim_clock_event event) {
+static void clock_listener(enum shared_clock_event event) {
     switch (event) {
-    case BESIM_CLOCK_EVENT_SHOW:
-    case BESIM_CLOCK_EVENT_ADJUSTED:
+    case SHARED_CLOCK_EVENT_SHOW:
+    case SHARED_CLOCK_EVENT_ADJUSTED:
         /* A second key extends the peek: the start work reschedules its end. */
         k_work_submit_to_queue(zmk_display_work_q(), &peek_start_work);
         break;
@@ -228,7 +228,7 @@ int oled_view_manager_init(lv_obj_t *status_container, lv_obj_t *clock_container
     mode = VIEW_STATUS;
     minute_counter = 0;
 
-    besim_clock_set_listener(clock_listener);
+    shared_clock_set_listener(clock_listener);
     keys_core_set_press_callback(press_cb);
     return 0;
 }

@@ -1,14 +1,14 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * Drawing helpers shared by the besim status screens: canvas wrappers, the battery row and the
+ * Drawing helpers shared by the shared status screens: canvas wrappers, the battery row and the
  * key cap. Based on ZMK's stock nice_view widgets (LVGL 9).
  */
 
 #include <stdio.h>
 #include <string.h>
 
-#include <besim/draw.h>
+#include <shared/draw.h>
 
 LV_IMG_DECLARE(charge_glyph);
 

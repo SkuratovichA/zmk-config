@@ -10,9 +10,9 @@
 
 #include <lvgl.h>
 
-#include <besim/clock.h>
-#include <besim/draw.h>
-#include <besim/status_state.h>
+#include <shared/clock.h>
+#include <shared/draw.h>
+#include <shared/status_state.h>
 
 #include "layout.h"
 #include "clock_view.h"
@@ -42,7 +42,7 @@ static const uint8_t digit_segments[10] = {
 static const lv_coord_t digit_x[4] = {OLED_CLOCK_DIGIT_X0, OLED_CLOCK_DIGIT_X1,
                                       OLED_CLOCK_DIGIT_X2, OLED_CLOCK_DIGIT_X3};
 
-static uint8_t canvas_buf[BESIM_CANVAS_BUF_SIZE(OLED_CLOCK_FACE_W, OLED_CLOCK_FACE_H)]
+static uint8_t canvas_buf[SHARED_CANVAS_BUF_SIZE(OLED_CLOCK_FACE_W, OLED_CLOCK_FACE_H)]
     __aligned(LV_DRAW_BUF_ALIGN);
 static lv_obj_t *canvas;
 
@@ -78,9 +78,9 @@ static void draw_digit(lv_coord_t x, uint8_t segments, lv_draw_rect_dsc_t *rect_
 }
 
 static void draw_battery_line(void) {
-    struct besim_battery_status_state left = besim_battery_status_get_state(NULL);
-    struct besim_peripheral_battery_status_state right =
-        besim_peripheral_battery_status_get_state(NULL);
+    struct shared_battery_status_state left = shared_battery_status_get_state(NULL);
+    struct shared_peripheral_battery_status_state right =
+        shared_peripheral_battery_status_get_state(NULL);
     char buf[16];
 
     if (right.known) {
@@ -103,16 +103,16 @@ int oled_clock_view_init(lv_obj_t *parent) {
 
     lv_obj_set_pos(canvas, 0, 0);
     lv_canvas_set_buffer(canvas, canvas_buf, OLED_CLOCK_FACE_W, OLED_CLOCK_FACE_H,
-                         BESIM_CANVAS_COLOR_FORMAT);
+                         SHARED_CANVAS_COLOR_FORMAT);
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
     return 0;
 }
 
 void oled_clock_view_refresh(uint32_t minute_counter) {
-    struct besim_clock_time t;
+    struct shared_clock_time t;
     uint8_t segments[4];
 
-    besim_clock_now(&t);
+    shared_clock_now(&t);
     if (t.set) {
         segments[0] = digit_segments[t.hour / 10];
         segments[1] = digit_segments[t.hour % 10];

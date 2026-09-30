@@ -7,7 +7,7 @@
  *
  * CONFIG_NICE_VIEW_BESIM_WIDGET_INVERTED is left undefined on purpose: the Lily draws black on
  * white. The shared sources that a later stage wires in for the new Lily additionally need
- * CONFIG_BESIM_DISPLAY_INVERTED to stay undefined, so do not define it here.
+ * CONFIG_SHARED_DISPLAY_INVERTED to stay undefined, so do not define it here.
  */
 
 #pragma once

@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: MIT
+#
+# Code shared by the status screens of this config. A shield selects the parts
+# its screen needs. Only the inversion is meant to be set by hand.
+
+config BESIM_DISPLAY_INVERTED
+    bool "Invert the colours of the besim status screens"
+
+config BESIM_DRAW
+    bool
+    select LV_USE_CANVAS
+    select LV_USE_IMAGE
+    select LV_FONT_UNSCII_8
+    select LV_FONT_MONTSERRAT_12
+
+config BESIM_KEYS_CORE
+    bool
+
+config BESIM_STATUS_STATE
+    bool
+
+config BESIM_CLOCK
+    bool
+
+config BESIM_BEHAVIOR_CLOCK
+    bool
+    default y
+    depends on DT_HAS_ZMK_BEHAVIOR_BESIM_CLOCK_ENABLED && BESIM_CLOCK

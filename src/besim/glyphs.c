@@ -12,7 +12,7 @@
 #endif
 
 const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST uint8_t charge_glyph_map[] = {
-#if CONFIG_NICE_VIEW_BESIM_WIDGET_INVERTED
+#if CONFIG_BESIM_DISPLAY_INVERTED
         0xff, 0xff, 0xff, 0xff, /*Color of index 0*/
         0x00, 0x00, 0x00, 0xff, /*Color of index 1*/
 #else

@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MIT
+
+description: Clock control for the besim OLED status screen
+
+compatible: "zmk,behavior-besim-clock"
+
+include: one_param.yaml

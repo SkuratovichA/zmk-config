@@ -10,6 +10,14 @@
 # besimboard_settings_reset.uf2 (flash the latter to BOTH halves to wipe every
 # Bluetooth bond, including the link between the halves, then re-flash the
 # normal firmware).
+#
+# Kyria: splitkb Kyria, nice!nano v2 on both halves, a 128x64 SSD1306 OLED on the
+# left half (custom status screen with a clock: boards/shields/oled_besim), RGB
+# LEDs on both halves. The board reads as a rev3, so kyria_rev3_left.uf2 and
+# kyria_rev3_right.uf2 are the ones to flash; rev2 and rev1 are built as well in
+# case the print on the PCB says otherwise. Flash besimboard_settings_reset.uf2 to
+# both halves first: it erases the whole settings partition, i.e. every bond AND
+# the stored state of the power rail that feeds the OLED.
 ---
 include:
   - board: nice_nano//zmk
@@ -23,3 +31,27 @@ include:
   - board: nice_nano//zmk
     shield: settings_reset
     artifact-name: besimboard_settings_reset
+  - board: nice_nano//zmk
+    shield: kyria_rev3_left oled_besim
+    snippet: studio-rpc-usb-uart
+    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    artifact-name: kyria_rev3_left
+  - board: nice_nano//zmk
+    shield: kyria_rev3_right
+    artifact-name: kyria_rev3_right
+  - board: nice_nano//zmk
+    shield: kyria_rev2_left oled_besim
+    snippet: studio-rpc-usb-uart
+    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    artifact-name: kyria_rev2_left
+  - board: nice_nano//zmk
+    shield: kyria_rev2_right
+    artifact-name: kyria_rev2_right
+  - board: nice_nano//zmk
+    shield: kyria_left oled_besim
+    snippet: studio-rpc-usb-uart
+    cmake-args: -DCONFIG_ZMK_STUDIO=y
+    artifact-name: kyria_rev1_left
+  - board: nice_nano//zmk
+    shield: kyria_right
+    artifact-name: kyria_rev1_right

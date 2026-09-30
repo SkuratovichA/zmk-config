@@ -1,0 +1,192 @@
+/*
+ * Kyria — splitkb Kyria rev3, ZMK.
+ *
+ * Built for a friend who comes from ordinary keyboards. The alpha block, the
+ * layers and the thumb order follow the besimboard (Aurora Lily58); the number
+ * row lives on LOWER, and the two upper thumb keys of each half carry what the
+ * missing row and the narrower bottom row took away.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+#include <dt-bindings/zmk/rgb.h>
+#include <dt-bindings/zmk/ext_power.h>
+#include <dt-bindings/besim/clock.h>
+
+#define BASE  0
+#define LOWER 1
+#define FN    2
+#define SYS   3
+
+/* macOS shortcuts */
+#define MAC_LOCK LC(LG(Q))
+#define MAC_UNDO LG(Z)
+#define MAC_REDO LG(LS(Z))
+
+/*
+ * Encoders.
+ *
+ * The shield defines each EC11 with steps = <80> and 20 triggers per rotation,
+ * i.e. one trigger per detent. If a click ever moves two steps (or none), tune
+ * it here, e.g. `&sensors { triggers-per-rotation = <10>; };`.
+ *
+ * `enc_kp` is `&inc_dec_kp` with a longer tap (10 ms instead of 5): a fast spin
+ * then offers at most ~200 HID reports/s, which Bluetooth can carry, so the
+ * report queue does not overflow and drop releases (which made the Mac's volume
+ * jump on the besimboard).
+ *
+ * Direction: ZMK's documentation names the FIRST binding as clockwise and the
+ * SECOND as counter-clockwise, and the bindings below follow that. It is not
+ * tested on this hardware. If an encoder turns the other way on your board,
+ * swap the two parameters of that encoder on every layer.
+ *
+ * Every layer lists two encoders: the left half's first, then the right half's.
+ * No function is bound to pressing an encoder.
+ */
+
+/ {
+    behaviors {
+        // The clock of the OLED status screen: &clk CLK_SHOW, CLK_HOUR_INC, ...
+        // (include/dt-bindings/besim/clock.h). The driver is built on the left
+        // half only; on the right the key does nothing.
+        clk: besim_clock {
+            compatible = "zmk,behavior-besim-clock";
+            #binding-cells = <1>;
+            display-name = "Clock";
+        };
+
+        enc_kp: encoder_key_press {
+            compatible = "zmk,behavior-sensor-rotate-var";
+            #sensor-binding-cells = <2>;
+            bindings = <&kp>, <&kp>;
+            tap-ms = <10>;
+        };
+
+        rgb_bri_enc: rgb_brightness_encoder {
+            compatible = "zmk,behavior-sensor-rotate";
+            #sensor-binding-cells = <0>;
+            bindings = <&rgb_ug RGB_BRI>, <&rgb_ug RGB_BRD>;
+        };
+
+        rgb_hue_enc: rgb_hue_encoder {
+            compatible = "zmk,behavior-sensor-rotate";
+            #sensor-binding-cells = <0>;
+            bindings = <&rgb_ug RGB_HUI>, <&rgb_ug RGB_HUD>;
+        };
+    };
+
+    // LOWER and FN held together give SYS.
+    conditional_layers {
+        compatible = "zmk,conditional-layers";
+        sys_tri_layer {
+            if-layers = <LOWER FN>;
+            then-layer = <SYS>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        base_layer {
+            display-name = "BASE";
+            // ----------------------------------------------------------------------------------------------------
+            // |  ESC  | Q | W |  E   | R |  T  |                              | Y  |  U   |  I   | O | P |   \   |
+            // |  TAB  | A | S |  D   | F |  G  |                              | H  |  J   |  K   | L | ; |   '   |
+            // | SHIFT | Z | X |  C   | V |  B  |  -  |  =   |   |  [  |   ]   | N  |  M   |  ,   | . | / | ENTER |
+            //                 | CTRL | ` | OPT | CMD | BSPC |   | SPC | LOWER | FN | RALT | CAPS |
+            bindings = <
+&kp ESC         &kp Q  &kp W  &kp E      &kp R      &kp T                                                                &kp Y   &kp U          &kp I         &kp O    &kp P     &kp BACKSLASH
+&kp TAB         &kp A  &kp S  &kp D      &kp F      &kp G                                                                &kp H   &kp J          &kp K         &kp L    &kp SEMI  &kp SQT
+&kp LEFT_SHIFT  &kp Z  &kp X  &kp C      &kp V      &kp B     &kp MINUS         &kp EQUAL          &kp LBKT   &kp RBKT   &kp N   &kp M          &kp COMMA     &kp DOT  &kp FSLH  &kp ENTER
+                              &kp LCTRL  &kp GRAVE  &kp LALT  &kp LEFT_COMMAND  &kp BACKSPACE      &kp SPACE  &mo LOWER  &mo FN  &kp RIGHT_ALT  &kp CAPSLOCK
+            >;
+
+            // encoders: left volume, right page up / down
+            sensor-bindings = <&enc_kp C_VOL_UP C_VOL_DN &enc_kp PG_UP PG_DN>;
+        };
+
+        lower_layer {
+            display-name = "LOWER";
+            // --------------------------------------------------------------------------------------
+            // | ` | 1 | 2 | 3 | 4 | 5 |                               |  6   | 7  | 8 | 9 | 0  | - |
+            // |   | ( | [ | ] | ) |   |                               |      | <- | v | ^ | -> | = |
+            // |   | ` |   |   |   |   | VOL- | VOL+ |   | MUTE | PLAY | CAPS | -  | = |   |    |   |
+            //             |   |   |   |      |      |   |      |      |      |    |   |
+            bindings = <
+&kp GRAVE  &kp N1     &kp N2    &kp N3    &kp N4    &kp N5                                                                &kp N6        &kp N7     &kp N8     &kp N9  &kp N0     &kp MINUS
+&trans     &kp LPAR   &kp LBKT  &kp RBKT  &kp RPAR  &trans                                                                &trans        &kp LEFT   &kp DOWN   &kp UP  &kp RIGHT  &kp EQUAL
+&trans     &kp GRAVE  &trans    &trans    &trans    &trans  &kp C_VOL_DN  &kp C_VOL_UP      &kp C_MUTE  &kp C_PLAY_PAUSE  &kp CAPSLOCK  &kp MINUS  &kp EQUAL  &trans  &trans     &trans
+                                &trans    &trans    &trans  &trans        &trans            &trans      &trans            &trans        &trans     &trans
+            >;
+
+            // encoders: left screen brightness, right next / previous track
+            sensor-bindings = <&enc_kp C_BRI_UP C_BRI_DN &enc_kp C_NEXT C_PREV>;
+        };
+
+        fn_layer {
+            display-name = "FN";
+            // -------------------------------------------------------------------------------------------------------------
+            // | LOCK | BT1 | BT2 | BT3 | BT4 | BT5 |                               | USB | BLE | TOG | UNLOCK |     |     |
+            // |  F1  |  F2 |  F3 |  F4 |  F5 |  F6 |                               |  F7 |  F8 |  F9 |  F10   | F11 | F12 |
+            // |      |     |     |     |     |     | BRI- | BRI+ |   | PREV | NEXT |     |     |     |        |     |     |
+            //                    |     |     |     |      | DEL  |   |      |      |     |     |     |
+            //
+            // BT1-5 select a Bluetooth profile, USB/BLE/TOG pick the output, UNLOCK opens
+            // the keyboard for ZMK Studio (zmk.studio, over USB or Bluetooth, left half).
+            // LOCK locks the Mac. FN + Backspace is Delete. The keys that can hurt (pairing,
+            // bootloader, reset, LEDs, clock) sit one layer further, on SYS.
+            bindings = <
+&kp MAC_LOCK  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                                          &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &studio_unlock  &trans   &trans
+&kp F1        &kp F2        &kp F3        &kp F4        &kp F5        &kp F6                                                                &kp F7        &kp F8        &kp F9        &kp F10         &kp F11  &kp F12
+&trans        &trans        &trans        &trans        &trans        &trans        &kp C_BRI_DN  &kp C_BRI_UP      &kp C_PREV  &kp C_NEXT  &trans        &trans        &trans        &trans          &trans   &trans
+                                          &trans        &trans        &trans        &trans        &kp DEL           &trans      &trans      &trans        &trans        &trans
+            >;
+
+            // encoders: left redo / undo, right page up / down
+            sensor-bindings = <&enc_kp MAC_REDO MAC_UNDO &enc_kp PG_UP PG_DN>;
+        };
+
+        sys_layer {
+            display-name = "SYS";
+            // -----------------------------------------------------------------------------------------------------
+            // |  BOOT  | x | H+ |   M+  | x | x |                   |  x  |  x   |  x   | UNLOCK |  x   |   BOOT  |
+            // | BT CLR | x | H- |   M-  | x | x |                   | RGB | EFF+ | HUE+ |  SAT+  | LED+ | CLR ALL |
+            // | RESET  | x | x  | CLOCK | x | x | x | x |   | x | x | PWR | EFF- | HUE- |  SAT-  | LED- |  RESET  |
+            //                   |       |   |   |   |   |   |   |   |     |      |      |
+            //
+            // Reached by holding LOWER and FN together. x does nothing, so a slip on this
+            // layer cannot reach the Bluetooth keys of FN.
+            // BOOT puts that half into the bootloader and RESET restarts that half; both act
+            // on the half where the key is. BT CLR forgets the pairing of the current
+            // profile, CLR ALL forgets all of them. RGB toggles the LEDs; EFF, HUE, SAT and
+            // LED step the effect, hue, saturation and brightness up (home row) and down
+            // (the row below), on both halves. H+, H-, M+ and M- set the clock of the OLED,
+            // CLOCK shows it for a few seconds. PWR switches the 3.3 V rail that feeds the
+            // OLED and the LEDs back on if it was ever stored as off: press it, wait a
+            // minute for the setting to be saved, then RESET the left half so the OLED
+            // initialises again.
+            bindings = <
+&bootloader  &none  &clk CLK_HOUR_INC  &clk CLK_MIN_INC  &none   &none                                       &none             &none            &none            &studio_unlock   &none            &bootloader
+&bt BT_CLR   &none  &clk CLK_HOUR_DEC  &clk CLK_MIN_DEC  &none   &none                                       &rgb_ug RGB_TOG   &rgb_ug RGB_EFF  &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &rgb_ug RGB_BRI  &bt BT_CLR_ALL
+&sys_reset   &none  &none              &clk CLK_SHOW     &none   &none   &none   &none       &none   &none   &ext_power EP_ON  &rgb_ug RGB_EFR  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_BRD  &sys_reset
+                                       &trans            &trans  &trans  &trans  &trans      &trans  &trans  &trans            &trans           &trans
+            >;
+
+            // encoders: left LED brightness, right LED hue, on both halves
+            sensor-bindings = <&rgb_bri_enc &rgb_hue_enc>;
+        };
+    };
+};
+
+/*
+ * RGB LEDs. A rev3 half carries 25 per-key LEDs and 6 underglow LEDs on one
+ * chain; the shield's default is 10. Extra entries are harmless on a half with
+ * fewer LEDs.
+ */
+&led_strip {
+    chain-length = <31>;
+};

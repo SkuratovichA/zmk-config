@@ -1,0 +1,8 @@
+/*
+ * SPDX-License-Identifier: MIT
+ *
+ * Empty on purpose. The keyboard shield already defines the SSD1306 node and
+ * makes it the chosen display, so this shield only adds the status screen.
+ * The file has to exist all the same: Zephyr finds a shield directory by its
+ * Kconfig.shield and takes the name of the shield from the overlay inside it.
+ */

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * Switches the besim OLED screen between the status view and the clock: an
+ * Switches the Kyria OLED screen between the status view and the clock: an
  * idle clock after a period without key presses, and a peek after a clock key.
  * All view changes run on the display work queue.
  */
@@ -96,7 +96,7 @@ static void idle_enter_handler(struct k_work *work) {
     mode = VIEW_IDLE_CLOCK;
     k_work_cancel_delayable(&peek_end_work);
     show_clock();
-    set_contrast(CONFIG_OLED_BESIM_CLOCK_CONTRAST);
+    set_contrast(CONFIG_KYRIA_OLED_CLOCK_CONTRAST);
     schedule_minute_work();
 }
 
@@ -130,7 +130,7 @@ static void peek_start_handler(struct k_work *work) {
     show_clock();
     set_contrast(NORMAL_CONTRAST);
     k_work_reschedule_for_queue(zmk_display_work_q(), &peek_end_work,
-                                K_MSEC(CONFIG_OLED_BESIM_CLOCK_PEEK_SECONDS * 1000));
+                                K_MSEC(CONFIG_KYRIA_OLED_CLOCK_PEEK_SECONDS * 1000));
     schedule_minute_work();
 }
 
@@ -183,7 +183,7 @@ static int activity_cb(const zmk_event_t *eh) {
     case ZMK_ACTIVITY_IDLE: {
         /* ZMK raises IDLE after CONFIG_ZMK_IDLE_TIMEOUT ms without activity. */
         int64_t delay =
-            MAX(0, (int64_t)CONFIG_OLED_BESIM_CLOCK_IDLE_SECONDS * 1000 - CONFIG_ZMK_IDLE_TIMEOUT);
+            MAX(0, (int64_t)CONFIG_KYRIA_OLED_CLOCK_IDLE_SECONDS * 1000 - CONFIG_ZMK_IDLE_TIMEOUT);
         k_work_schedule_for_queue(zmk_display_work_q(), &idle_enter_work, K_MSEC(delay));
         break;
     }

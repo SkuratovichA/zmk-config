@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * The keys area of the besim OLED screen: one canvas per key cap, redrawn only when its state or
+ * The keys area of the Kyria OLED screen: one canvas per key cap, redrawn only when its state or
  * label changed, and a keyboard glyph shown while no key is on the screen.
  */
 

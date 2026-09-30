@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: MIT
 #
-# besim OLED status screen for a 128x64 SSD1306: both batteries, the output with
+# Kyria OLED status screen for a 128x64 SSD1306: both batteries, the output with
 # the Bluetooth profiles, the layer, the keys being pressed, and a clock that
 # takes over after a while without key presses. The display node itself comes
 # from the keyboard shield.
 
-if SHIELD_OLED_BESIM
+if SHIELD_KYRIA_OLED
 
 choice ZMK_DISPLAY_WORK_QUEUE
     default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
@@ -16,23 +16,23 @@ choice ZMK_DISPLAY_STATUS_SCREEN
 endchoice
 
 config ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
-    imply OLED_BESIM_WIDGET_STATUS
+    imply KYRIA_OLED_WIDGET_STATUS
 
-config OLED_BESIM_WIDGET_STATUS
-    bool "besim OLED status screen"
+config KYRIA_OLED_WIDGET_STATUS
+    bool "Kyria OLED status screen"
     select BESIM_DRAW
     select BESIM_KEYS_CORE
     select BESIM_STATUS_STATE if !ZMK_SPLIT || ZMK_SPLIT_ROLE_CENTRAL
 
-config OLED_BESIM_CLOCK
+config KYRIA_OLED_CLOCK
     bool "Show a clock after a period without key presses"
     default y
-    depends on OLED_BESIM_WIDGET_STATUS
+    depends on KYRIA_OLED_WIDGET_STATUS
     select BESIM_CLOCK
 
-if OLED_BESIM_CLOCK
+if KYRIA_OLED_CLOCK
 
-config OLED_BESIM_CLOCK_IDLE_SECONDS
+config KYRIA_OLED_CLOCK_IDLE_SECONDS
     int "Seconds without a key press before the clock appears"
     default 300
     range 1 86400
@@ -41,7 +41,7 @@ config OLED_BESIM_CLOCK_IDLE_SECONDS
       takes ZMK_IDLE_TIMEOUT. A smaller value here shows the clock at that
       moment.
 
-config OLED_BESIM_CLOCK_CONTRAST
+config KYRIA_OLED_CLOCK_CONTRAST
     int "Display contrast while the idle clock is shown"
     default 16
     range 0 255
@@ -49,12 +49,12 @@ config OLED_BESIM_CLOCK_CONTRAST
       The panel is dimmed while it shows the idle clock and returns to
       SSD1306_DEFAULT_CONTRAST afterwards.
 
-config OLED_BESIM_CLOCK_PEEK_SECONDS
+config KYRIA_OLED_CLOCK_PEEK_SECONDS
     int "Seconds the clock stays visible after a clock key"
     default 10
     range 1 3600
 
-endif # OLED_BESIM_CLOCK
+endif # KYRIA_OLED_CLOCK
 
 if ZMK_SPLIT_ROLE_CENTRAL
 
@@ -63,4 +63,4 @@ config ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING
 
 endif # ZMK_SPLIT_ROLE_CENTRAL
 
-endif # SHIELD_OLED_BESIM
+endif # SHIELD_KYRIA_OLED

@@ -1,6 +1,6 @@
 file_format: "1"
-id: oled_besim
-name: besim OLED status screen
+id: kyria_oled
+name: Kyria OLED status screen
 type: shield
 url: https://github.com/SkuratovichA/zmk-config
 features:

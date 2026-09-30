@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * Status screen of the besim OLED shield: a status view and, when the clock
+ * Status screen of the Kyria OLED shield: a status view and, when the clock
  * is enabled, a clock view on the same screen. One of the two is hidden.
  */
 
@@ -21,7 +21,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-BUILD_ASSERT(BESIM_IS_CENTRAL, "the oled_besim shield belongs on the central half");
+BUILD_ASSERT(BESIM_IS_CENTRAL, "the kyria_oled shield belongs on the central half");
 
 /* A plain container: no theme style, no padding, no scrolling. */
 static lv_obj_t *make_view(lv_obj_t *screen) {
@@ -50,7 +50,7 @@ lv_obj_t *zmk_display_status_screen() {
         LOG_ERR("keys view failed to start");
     }
 
-#if IS_ENABLED(CONFIG_OLED_BESIM_CLOCK)
+#if IS_ENABLED(CONFIG_KYRIA_OLED_CLOCK)
     lv_obj_t *clock = make_view(screen);
     lv_obj_add_flag(clock, LV_OBJ_FLAG_HIDDEN);
     if (oled_clock_view_init(clock) != 0 || oled_view_manager_init(status, clock) != 0) {

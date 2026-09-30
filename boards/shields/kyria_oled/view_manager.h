@@ -1,14 +1,14 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * Decides which view the besim OLED screen shows.
+ * Decides which view the Kyria OLED screen shows.
  *
  *   status      the normal screen
  *   idle clock  the clock at low contrast, after
- *               CONFIG_OLED_BESIM_CLOCK_IDLE_SECONDS without a key press,
+ *               CONFIG_KYRIA_OLED_CLOCK_IDLE_SECONDS without a key press,
  *               until the next key press
  *   peek        the clock at normal contrast, for
- *               CONFIG_OLED_BESIM_CLOCK_PEEK_SECONDS after a clock key, or
+ *               CONFIG_KYRIA_OLED_CLOCK_PEEK_SECONDS after a clock key, or
  *               until any other key is pressed
  */
 

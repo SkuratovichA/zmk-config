@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * The status strip of the besim OLED screen: both batteries, the output with
+ * The status strip of the Kyria OLED screen: both batteries, the output with
  * the Bluetooth profiles, and the layer name.
  */
 

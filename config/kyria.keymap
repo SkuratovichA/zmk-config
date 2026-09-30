@@ -22,60 +22,21 @@
 #define FN    2
 #define SYS   3
 
-/* macOS shortcuts */
+/* macOS shortcut */
 #define MAC_LOCK LC(LG(Q))
-#define MAC_UNDO LG(Z)
-#define MAC_REDO LG(LS(Z))
-
-/*
- * Encoders.
- *
- * The shield defines each EC11 with steps = <80> and 20 triggers per rotation,
- * i.e. one trigger per detent. If a click ever moves two steps (or none), tune
- * it here, e.g. `&sensors { triggers-per-rotation = <10>; };`.
- *
- * `enc_kp` is `&inc_dec_kp` with a longer tap (10 ms instead of 5): a fast spin
- * then offers at most ~200 HID reports/s, which Bluetooth can carry, so the
- * report queue does not overflow and drop releases (which made the Mac's volume
- * jump on the besimboard).
- *
- * Direction: ZMK's documentation names the FIRST binding as clockwise and the
- * SECOND as counter-clockwise, and the bindings below follow that. It is not
- * tested on this hardware. If an encoder turns the other way on your board,
- * swap the two parameters of that encoder on every layer.
- *
- * Every layer lists two encoders: the left half's first, then the right half's.
- * No function is bound to pressing an encoder.
- */
 
 / {
     behaviors {
         // The clock of the OLED status screen: &clk CLK_SHOW, CLK_HOUR_INC, ...
         // (include/dt-bindings/besim/clock.h). The driver is built on the left
         // half only; on the right the key does nothing.
+        //
+        // The board has switches, not encoders, in the encoder positions, so
+        // there are no sensor-bindings here (see the end of this file).
         clk: besim_clock {
             compatible = "zmk,behavior-besim-clock";
             #binding-cells = <1>;
             display-name = "Clock";
-        };
-
-        enc_kp: encoder_key_press {
-            compatible = "zmk,behavior-sensor-rotate-var";
-            #sensor-binding-cells = <2>;
-            bindings = <&kp>, <&kp>;
-            tap-ms = <10>;
-        };
-
-        rgb_bri_enc: rgb_brightness_encoder {
-            compatible = "zmk,behavior-sensor-rotate";
-            #sensor-binding-cells = <0>;
-            bindings = <&rgb_ug RGB_BRI>, <&rgb_ug RGB_BRD>;
-        };
-
-        rgb_hue_enc: rgb_hue_encoder {
-            compatible = "zmk,behavior-sensor-rotate";
-            #sensor-binding-cells = <0>;
-            bindings = <&rgb_ug RGB_HUI>, <&rgb_ug RGB_HUD>;
         };
     };
 
@@ -104,9 +65,6 @@
 &kp LEFT_SHIFT  &kp Z  &kp X  &kp C      &kp V      &kp B     &kp MINUS         &kp EQUAL          &kp LBKT   &kp RBKT   &kp N   &kp M          &kp COMMA     &kp DOT  &kp FSLH  &kp ENTER
                               &kp LCTRL  &kp GRAVE  &kp LALT  &kp LEFT_COMMAND  &kp BACKSPACE      &kp SPACE  &mo LOWER  &mo FN  &kp RIGHT_ALT  &kp CAPSLOCK
             >;
-
-            // encoders: left volume, right page up / down
-            sensor-bindings = <&enc_kp C_VOL_UP C_VOL_DN &enc_kp PG_UP PG_DN>;
         };
 
         lower_layer {
@@ -122,9 +80,6 @@
 &trans     &kp GRAVE  &trans    &trans    &trans    &trans  &kp C_VOL_DN  &kp C_VOL_UP      &kp C_MUTE  &kp C_PLAY_PAUSE  &kp CAPSLOCK  &kp MINUS  &kp EQUAL  &trans  &trans     &trans
                                 &trans    &trans    &trans  &trans        &trans            &trans      &trans            &trans        &trans     &trans
             >;
-
-            // encoders: left screen brightness, right next / previous track
-            sensor-bindings = <&enc_kp C_BRI_UP C_BRI_DN &enc_kp C_NEXT C_PREV>;
         };
 
         fn_layer {
@@ -145,9 +100,6 @@
 &trans        &trans        &trans        &trans        &trans        &trans        &kp C_BRI_DN  &kp C_BRI_UP      &kp C_PREV  &kp C_NEXT  &trans        &trans        &trans        &trans          &trans   &trans
                                           &trans        &trans        &trans        &trans        &kp DEL           &trans      &trans      &trans        &trans        &trans
             >;
-
-            // encoders: left redo / undo, right page up / down
-            sensor-bindings = <&enc_kp MAC_REDO MAC_UNDO &enc_kp PG_UP PG_DN>;
         };
 
         sys_layer {
@@ -175,9 +127,6 @@
 &sys_reset   &none  &none              &clk CLK_SHOW     &none   &none   &none   &none       &none   &none   &ext_power EP_ON  &rgb_ug RGB_EFR  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_BRD  &sys_reset
                                        &trans            &trans  &trans  &trans  &trans      &trans  &trans  &trans            &trans           &trans
             >;
-
-            // encoders: left LED brightness, right LED hue, on both halves
-            sensor-bindings = <&rgb_bri_enc &rgb_hue_enc>;
         };
     };
 };
@@ -189,4 +138,21 @@
  */
 &led_strip {
     chain-length = <31>;
+};
+
+/*
+ * No encoders are fitted (switches sit in their positions), so the encoder
+ * nodes and the sensors node are switched off. Without this ZMK links in the
+ * EC11 driver and a sensor keymap for hardware that is not there.
+ */
+&left_encoder {
+    status = "disabled";
+};
+
+&right_encoder {
+    status = "disabled";
+};
+
+&sensors {
+    status = "disabled";
 };

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: MIT
  *
- * The clock face of the besim OLED screen: HH:MM in seven-segment digits drawn
+ * The clock face of the Kyria OLED screen: HH:MM in seven-segment digits drawn
  * from filled rectangles, and a line with both battery levels.
  */
 

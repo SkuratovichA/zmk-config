@@ -1,0 +1,90 @@
+# SPDX-License-Identifier: MIT
+#
+# Code shared by the status screens of this config. A shield selects the parts
+# its screen needs. Only the inversion is meant to be set by hand.
+
+config SHARED_DISPLAY_INVERTED
+    bool "Invert the colours of the shared status screens"
+
+config SHARED_DRAW
+    bool
+    select LV_USE_CANVAS
+    select LV_USE_IMAGE
+    select LV_FONT_UNSCII_8
+    select LV_FONT_MONTSERRAT_12
+
+config SHARED_KEYS_CORE
+    bool
+
+config SHARED_STATUS_STATE
+    bool
+
+config SHARED_CLOCK
+    bool
+
+config SHARED_BEHAVIOR_CLOCK
+    bool
+    default y
+    depends on DT_HAS_ZMK_BEHAVIOR_OLED_CLOCK_ENABLED && SHARED_CLOCK
+
+config SHARED_LED_FRAME
+    bool
+    default y
+    depends on DT_HAS_SKURATOVICH_LED_FRAME_ENABLED && LED_STRIP
+    help
+      The one writer of the physical LED chain; ZMK's underglow and the
+      per-key effect write their pixels into it.
+
+config SHARED_LED_FRAME_MIN_MS
+    int "Milliseconds between two writes of the LED chain"
+    default 10
+    range 1 100
+    depends on SHARED_LED_FRAME
+
+config SHARED_LED_STRIP_WINDOW
+    bool
+    default y
+    depends on DT_HAS_SKURATOVICH_LED_STRIP_WINDOW_ENABLED && SHARED_LED_FRAME
+
+config SHARED_KEY_RGB
+    bool "Light a pressed key's LED in a random colour and fade it out"
+    default y
+    depends on DT_HAS_SKURATOVICH_KEY_RGB_ENABLED && SHARED_LED_FRAME && ZMK_RGB_UNDERGLOW
+    help
+      Needs a skuratovich,key-rgb node in the devicetree (normally in the
+      keymap) that maps key positions to LEDs of the chain. The per-key LEDs
+      and the underglow LEDs share the chain through the LED frame.
+
+if SHARED_KEY_RGB
+
+config SHARED_KEY_RGB_ON_START
+    bool "Per-key effect on at first boot"
+    default y
+    help
+      The switch is kept in the settings afterwards; the LED mode key changes
+      it.
+
+config SHARED_KEY_RGB_FADE_MS
+    int "Milliseconds a pressed key's LED takes to fade out"
+    default 1000
+    range 50 10000
+
+config SHARED_KEY_RGB_TICK_MS
+    int "Milliseconds between two frames of the fade"
+    default 25
+    range 5 500
+
+config SHARED_KEY_RGB_RAIL_OFF_MS
+    int "Milliseconds after the last fade before the LED power rail goes off again"
+    default 2000
+    range 100 60000
+    help
+      Only on a half where ZMK_RGB_UNDERGLOW_EXT_POWER is on, where the rail
+      is off whenever the underglow is off.
+
+endif # SHARED_KEY_RGB
+
+config SHARED_BEHAVIOR_LED_MODE
+    bool
+    default y
+    depends on DT_HAS_ZMK_BEHAVIOR_LED_MODE_ENABLED && SHARED_KEY_RGB

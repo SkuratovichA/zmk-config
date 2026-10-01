@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: MIT
+
+description: |
+  A LED strip that is a window onto part of the LED frame. Point ZMK's chosen
+  zmk,underglow at it to confine the underglow effects to some LEDs of the
+  chain.
+
+compatible: "skuratovich,led-strip-window"
+
+include: base.yaml
+
+properties:
+  offset:
+    type: int
+    default: 0
+    description: Index in the frame of the window's first LED.
+  chain-length:
+    type: int
+    required: true
+    description: Number of LEDs in the window.

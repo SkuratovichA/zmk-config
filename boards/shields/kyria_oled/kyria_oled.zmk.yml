@@ -1,0 +1,7 @@
+file_format: "1"
+id: kyria_oled
+name: Kyria OLED status screen
+type: shield
+url: https://github.com/SkuratovichA/zmk-config
+features:
+  - display

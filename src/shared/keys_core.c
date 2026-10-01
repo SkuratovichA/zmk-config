@@ -39,7 +39,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
  * labels.
  */
 #include <zmk/matrix.h>
-#define SHARED_KEYMAP_LAYER(node)                                                                   \
+#define SHARED_KEYMAP_LAYER(node)                                                                  \
     {LISTIFY(DT_PROP_LEN(node, bindings), ZMK_KEYMAP_EXTRACT_BINDING, (, ), node)},
 static const struct zmk_behavior_binding keymap_layers[][ZMK_KEYMAP_LEN] = {
     ZMK_KEYMAP_LAYERS_FOREACH(SHARED_KEYMAP_LAYER)};
@@ -305,6 +305,11 @@ static bool binding_label(const struct zmk_behavior_binding *binding, char *out,
     }
     if (strcmp(dev, "extpower") == 0) {
         strncpy(out, "PWR", len - 1);
+        out[len - 1] = '\0';
+        return true;
+    }
+    if (strcmp(dev, "led_mode") == 0) {
+        strncpy(out, "LEDS", len - 1);
         out[len - 1] = '\0';
         return true;
     }

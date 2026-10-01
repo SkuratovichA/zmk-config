@@ -38,6 +38,13 @@
             #binding-cells = <1>;
             display-name = "Clock";
         };
+
+        // The LED mode key: off, underglow, per-key, both, on both halves.
+        led_mode: led_mode {
+            compatible = "zmk,behavior-led-mode";
+            #binding-cells = <0>;
+            display-name = "LED mode";
+        };
     };
 
     // LOWER and FN held together give SYS.
@@ -49,11 +56,30 @@
         };
     };
 
-    // Per-key RGB: while the underglow is off, a pressed key lights its LED in
-    // a random colour and fades out (src/shared/key_rgb.c). One entry per key
-    // in keymap order: the LED's index in the chain of the half that carries
-    // the key. On a rev3 half LEDs 0-5 are the underglow, 6-30 sit under the
-    // keys, from the thumb cluster up (order taken from QMK's rev3 rgb_matrix).
+    // LEDs. One chain of 31 per half: LEDs 0-5 are the underglow, 6-30 sit
+    // under the keys, from the thumb cluster up (order taken from QMK's rev3
+    // rgb_matrix). The chain is written through one frame (src/shared/led_frame.c):
+    // ZMK's underglow sees only the six underglow LEDs through the window below,
+    // the per-key effect (src/shared/key_rgb.c) lights a pressed key's LED in a
+    // random colour and fades it out. &led_mode cycles off, underglow, per-key,
+    // both.
+    led_frame {
+        compatible = "skuratovich,led-frame";
+        strip = <&led_strip>;
+    };
+
+    rgb_window: rgb_window {
+        compatible = "skuratovich,led-strip-window";
+        offset = <0>;
+        chain-length = <6>;
+    };
+
+    chosen {
+        zmk,underglow = &rgb_window;
+    };
+
+    // One entry per key in keymap order: the LED's index in the chain of the
+    // half that carries the key.
     key_rgb {
         compatible = "skuratovich,key-rgb";
         key-leds = <
@@ -119,19 +145,19 @@
 
         sys_layer {
             display-name = "SYS";
-            // -----------------------------------------------------------------------------------------------------
-            // |  BOOT  | x | H+ |   M+  | x | x |                   |  x  |  x   |  x   | UNLOCK |  x   |   BOOT  |
-            // | BT CLR | x | H- |   M-  | x | x |                   | RGB | EFF+ | HUE+ |  SAT+  | LED+ | CLR ALL |
-            // | RESET  | x | x  | CLOCK | x | x | x | x |   | x | x | PWR | EFF- | HUE- |  SAT-  | LED- |  RESET  |
-            //                   |       |   |   |   |   |   |   |   |     |      |      |
+            // ------------------------------------------------------------------------------------------------------
+            // |  BOOT  | x | H+ |   M+  | x | x |                   |  x   |  x   |  x   | UNLOCK |  x   |   BOOT  |
+            // | BT CLR | x | H- |   M-  | x | x |                   | LEDS | EFF+ | HUE+ |  SAT+  | LED+ | CLR ALL |
+            // | RESET  | x | x  | CLOCK | x | x | x | x |   | x | x | PWR  | EFF- | HUE- |  SAT-  | LED- |  RESET  |
+            //                   |       |   |   |   |   |   |   |   |      |      |      |
             //
             // Reached by holding LOWER and FN together. x does nothing, so a slip on this
             // layer cannot reach the Bluetooth keys of FN.
             // BOOT puts that half into the bootloader and RESET restarts that half; both act
             // on the half where the key is. BT CLR forgets the pairing of the current
-            // profile, CLR ALL forgets all of them. RGB toggles the underglow effects on all
-            // LEDs; while they are off, every pressed key lights its own LED in a random
-            // colour and fades out. EFF, HUE, SAT and LED step the underglow's effect, hue,
+            // profile, CLR ALL forgets all of them. LEDS cycles the LED mode on both halves:
+            // off, underglow only, per-key only (a pressed key lights up and fades),
+            // underglow and per-key. EFF, HUE, SAT and LED step the underglow's effect, hue,
             // saturation and brightness up (home row) and down (the row below), on both
             // halves. H+, H-, M+ and M- set the clock of the OLED,
             // CLOCK shows it for a few seconds. PWR switches the 3.3 V rail that feeds the
@@ -140,7 +166,7 @@
             // initialises again.
             bindings = <
 &bootloader  &none  &clk CLK_HOUR_INC  &clk CLK_MIN_INC  &none   &none                                       &none             &none            &none            &studio_unlock   &none            &bootloader
-&bt BT_CLR   &none  &clk CLK_HOUR_DEC  &clk CLK_MIN_DEC  &none   &none                                       &rgb_ug RGB_TOG   &rgb_ug RGB_EFF  &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &rgb_ug RGB_BRI  &bt BT_CLR_ALL
+&bt BT_CLR   &none  &clk CLK_HOUR_DEC  &clk CLK_MIN_DEC  &none   &none                                       &led_mode         &rgb_ug RGB_EFF  &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &rgb_ug RGB_BRI  &bt BT_CLR_ALL
 &sys_reset   &none  &none              &clk CLK_SHOW     &none   &none   &none   &none       &none   &none   &ext_power EP_ON  &rgb_ug RGB_EFR  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_BRD  &sys_reset
                                        &trans            &trans  &trans  &trans  &trans      &trans  &trans  &trans            &trans           &trans
             >;

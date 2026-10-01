@@ -35,6 +35,27 @@ static struct shared_peripheral_battery_status_state peripheral_state;
 static struct shared_output_status_state output_state;
 static struct shared_layer_status_state layer_state;
 
+LV_IMG_DECLARE(charge_glyph);
+
+/* "L 87%" in UNSCII 8, "L --%" while the level is unknown, a bolt when charging. */
+static void draw_battery_text(lv_obj_t *canvas, lv_coord_t x, const char *label, uint8_t level,
+                              bool known, bool charging) {
+    lv_draw_label_dsc_t label_dsc;
+    init_label_dsc(&label_dsc, LVGL_FOREGROUND, &lv_font_unscii_8, LV_TEXT_ALIGN_LEFT);
+    char text[12];
+    if (known) {
+        snprintf(text, sizeof(text), "%s %u%%", label, level);
+    } else {
+        snprintf(text, sizeof(text), "%s --%%", label);
+    }
+    canvas_draw_text(canvas, x, OLED_BATTERY_Y + 1, OLED_BATTERY_TEXT_MAX_W, &label_dsc, text);
+    if (charging) {
+        lv_draw_image_dsc_t img_dsc;
+        lv_draw_image_dsc_init(&img_dsc);
+        canvas_draw_img(canvas, x + OLED_BATTERY_BOLT_X, OLED_BATTERY_Y, &charge_glyph, &img_dsc);
+    }
+}
+
 static void init_hollow_dsc(lv_draw_rect_dsc_t *dsc) {
     init_rect_dsc(dsc, LVGL_FOREGROUND);
     dsc->bg_opa = LV_OPA_TRANSP;
@@ -113,10 +134,9 @@ static void redraw_strip(void) {
 #else
     bool charging = false;
 #endif
-    draw_battery_row(strip_canvas, OLED_BATTERY_LEFT_X, OLED_BATTERY_Y, OLED_BATTERY_BODY_W, "L",
-                     battery_state.level, charging, true);
-    draw_battery_row(strip_canvas, OLED_BATTERY_RIGHT_X, OLED_BATTERY_Y, OLED_BATTERY_BODY_W, "R",
-                     peripheral_state.level, false, peripheral_state.known);
+    draw_battery_text(strip_canvas, OLED_BATTERY_LEFT_X, "L", battery_state.level, true, charging);
+    draw_battery_text(strip_canvas, OLED_BATTERY_RIGHT_X, "R", peripheral_state.level,
+                      peripheral_state.known, false);
 
     draw_output(strip_canvas);
     draw_profiles(strip_canvas);

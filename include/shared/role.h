@@ -9,5 +9,5 @@
 
 #include <zephyr/sys/util.h>
 
-#define SHARED_IS_CENTRAL                                                                           \
+#define SHARED_IS_CENTRAL                                                                          \
     (!IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL))

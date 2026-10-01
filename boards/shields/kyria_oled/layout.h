@@ -18,13 +18,14 @@
 #define OLED_STATUS_H 24
 
 /*
- * Battery row: two cells of 62 (a body of 18 plus label, nub and text), the
- * right one at 66 so that the left cell's "87%" and the "R" do not touch.
+ * Battery row: "L 87%" and "R 64%" as text (UNSCII 8, five characters, 40 px),
+ * the charge bolt after the left one when USB power is present.
  */
 #define OLED_BATTERY_Y 0
-#define OLED_BATTERY_BODY_W 18
 #define OLED_BATTERY_LEFT_X 0
 #define OLED_BATTERY_RIGHT_X 66
+#define OLED_BATTERY_TEXT_MAX_W 47
+#define OLED_BATTERY_BOLT_X 44
 
 /* Output in Montserrat 12, whose line of 15 ends at the last row of the strip. */
 #define OLED_OUTPUT_X 0

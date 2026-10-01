@@ -2,9 +2,9 @@
  * SPDX-License-Identifier: MIT
  *
  * Reactive per-key RGB: a pressed key lights its LED in a random colour and
- * fades out over CONFIG_SHARED_KEY_RGB_FADE_MS. Each half runs this for its own
- * keys. The strip is written only while ZMK's underglow is off; with the
- * underglow on, ZMK's effect owns every LED of the chain.
+ * fades out over CONFIG_SHARED_KEY_RGB_FADE_MS. Each half runs this for its
+ * own keys. The pixels go into the LED frame (include/shared/led_frame.h)
+ * next to ZMK's underglow, which owns the other LEDs of the chain.
  *
  * Threads: the position listener runs on the thread that raised the event and
  * only records the press; the fade is drawn from a delayable work item on the
@@ -21,6 +21,7 @@
 #include <zephyr/drivers/led_strip.h>
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
+#include <zephyr/settings/settings.h>
 #include <zephyr/spinlock.h>
 #include <zephyr/sys/util.h>
 
@@ -29,32 +30,33 @@
 #include <zmk/events/position_state_changed.h>
 #include <zmk/rgb_underglow.h>
 
+#include <shared/key_rgb.h>
+#include <shared/led_frame.h>
+
 #include <zephyr/logging/log.h>
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#define STRIP_NODE DT_CHOSEN(zmk_underglow)
-#define STRIP_LEN DT_PROP(STRIP_NODE, chain_length)
 #define NO_LED 255
+#define MAX_LEDS 64
 
 #define FADE_MS CONFIG_SHARED_KEY_RGB_FADE_MS
 #define TICK_MS CONFIG_SHARED_KEY_RGB_TICK_MS
 /* Peak brightness as a 0..255 value, from the underglow's cap in percent. */
 #define PEAK_VALUE ((CONFIG_ZMK_RGB_UNDERGLOW_BRT_MAX * 255) / 100)
 
-static const struct device *const strip = DEVICE_DT_GET(STRIP_NODE);
 static const uint8_t key_leds[] = DT_INST_PROP(0, key_leds);
 
-/* One fade per LED: the colour it was lit with and when. */
+/* One fade per LED of the chain: the colour it was lit with and when. */
 struct fade {
     bool active;
     int64_t started;
     struct led_rgb peak;
 };
 
-static struct fade fades[STRIP_LEN];
-static struct led_rgb pixels[STRIP_LEN];
+static struct fade fades[MAX_LEDS];
 static struct k_spinlock lock;
 static bool ready;
+static bool enabled = IS_ENABLED(CONFIG_SHARED_KEY_RGB_ON_START);
 static uint32_t rng_state;
 
 static void tick_handler(struct k_work *work);
@@ -92,21 +94,21 @@ static struct led_rgb hue_to_rgb(uint16_t hue, uint8_t value) {
     }
 }
 
-static bool underglow_is_on(void) {
-    bool on = false;
-    return zmk_rgb_underglow_get_state(&on) == 0 && on;
-}
-
 #if IS_ENABLED(CONFIG_ZMK_RGB_UNDERGLOW_EXT_POWER)
 
 /*
  * On a half where the underglow manages the LED power rail, the rail is off
  * whenever the underglow is off. The rail goes on for a fade and off again
- * CONFIG_SHARED_KEY_RGB_RAIL_OFF_MS after the last one, so that dark LEDs do
- * not drain the battery.
+ * CONFIG_SHARED_KEY_RGB_RAIL_OFF_MS after the last one, unless the underglow
+ * is on and keeps it.
  */
 static const struct device *const ext_power =
     DEVICE_DT_GET_OR_NULL(DT_INST(0, zmk_ext_power_generic));
+
+static bool underglow_is_on(void) {
+    bool on = false;
+    return zmk_rgb_underglow_get_state(&on) == 0 && on;
+}
 
 static void rail_off_handler(struct k_work *work) {
     ARG_UNUSED(work);
@@ -159,24 +161,16 @@ static struct led_rgb faded(const struct led_rgb *peak, int64_t elapsed) {
 static void tick_handler(struct k_work *work) {
     ARG_UNUSED(work);
     const int64_t now = k_uptime_get();
+    const size_t len = MIN(led_frame_length(), MAX_LEDS);
     bool any = false;
 
     k_spinlock_key_t key = k_spin_lock(&lock);
-    if (underglow_is_on()) {
-        /* ZMK's effect owns the strip now; forget the fades. */
-        for (int i = 0; i < STRIP_LEN; i++) {
-            fades[i].active = false;
-        }
-        k_spin_unlock(&lock, key);
-        return;
-    }
-    for (int i = 0; i < STRIP_LEN; i++) {
+    for (size_t i = 0; i < len; i++) {
         if (!fades[i].active) {
-            pixels[i] = (struct led_rgb){0};
             continue;
         }
         const int64_t elapsed = now - fades[i].started;
-        pixels[i] = faded(&fades[i].peak, elapsed);
+        led_frame_set(i, faded(&fades[i].peak, elapsed));
         if (elapsed >= FADE_MS) {
             fades[i].active = false;
         } else {
@@ -185,10 +179,7 @@ static void tick_handler(struct k_work *work) {
     }
     k_spin_unlock(&lock, key);
 
-    const int rc = led_strip_update_rgb(strip, pixels, STRIP_LEN);
-    if (rc != 0) {
-        LOG_WRN("led strip update failed: %d", rc);
-    }
+    led_frame_flush();
     if (any) {
         k_work_schedule(&tick_work, K_MSEC(TICK_MS));
     } else {
@@ -196,9 +187,74 @@ static void tick_handler(struct k_work *work) {
     }
 }
 
+bool key_rgb_is_enabled(void) { return enabled; }
+
+#if IS_ENABLED(CONFIG_SETTINGS)
+
+static void save_handler(struct k_work *work) {
+    ARG_UNUSED(work);
+    const uint8_t on = enabled ? 1 : 0;
+    settings_save_one("key_rgb/on", &on, sizeof(on));
+}
+
+static K_WORK_DELAYABLE_DEFINE(save_work, save_handler);
+
+static int key_rgb_settings_set(const char *name, size_t len, settings_read_cb read_cb,
+                                void *cb_arg) {
+    const char *next;
+    if (settings_name_steq(name, "on", &next) && !next) {
+        uint8_t on;
+        if (len != sizeof(on)) {
+            return -EINVAL;
+        }
+        const int rc = read_cb(cb_arg, &on, sizeof(on));
+        if (rc >= 0) {
+            enabled = on != 0;
+            return 0;
+        }
+        return rc;
+    }
+    return -ENOENT;
+}
+
+SETTINGS_STATIC_HANDLER_DEFINE(key_rgb, "key_rgb", NULL, key_rgb_settings_set, NULL, NULL);
+
+static void save_enabled(void) {
+    k_work_reschedule(&save_work, K_MSEC(CONFIG_ZMK_SETTINGS_SAVE_DEBOUNCE));
+}
+
+#else
+
+static void save_enabled(void) {}
+
+#endif /* CONFIG_SETTINGS */
+
+void key_rgb_set_enabled(bool on) {
+    if (enabled == on) {
+        return;
+    }
+    enabled = on;
+    save_enabled();
+    if (on) {
+        return;
+    }
+    /* Ends every fade at once: black pixels, one flush, the rail released. */
+    const size_t len = MIN(led_frame_length(), MAX_LEDS);
+    k_spinlock_key_t key = k_spin_lock(&lock);
+    for (size_t i = 0; i < len; i++) {
+        if (fades[i].active) {
+            fades[i].active = false;
+            led_frame_set(i, (struct led_rgb){0});
+        }
+    }
+    k_spin_unlock(&lock, key);
+    led_frame_flush();
+    rail_release();
+}
+
 static int position_listener(const zmk_event_t *eh) {
     const struct zmk_position_state_changed *ev = as_zmk_position_state_changed(eh);
-    if (ev == NULL || !ev->state || !ready) {
+    if (ev == NULL || !ev->state || !ready || !enabled) {
         return ZMK_EV_EVENT_BUBBLE;
     }
     /* On the central, keys of the other half arrive too; that half lights its own. */
@@ -209,7 +265,7 @@ static int position_listener(const zmk_event_t *eh) {
         return ZMK_EV_EVENT_BUBBLE;
     }
     const uint8_t led = key_leds[ev->position];
-    if (led == NO_LED || led >= STRIP_LEN || underglow_is_on()) {
+    if (led == NO_LED || led >= MIN(led_frame_length(), MAX_LEDS)) {
         return ZMK_EV_EVENT_BUBBLE;
     }
 
@@ -225,14 +281,10 @@ static int position_listener(const zmk_event_t *eh) {
     return ZMK_EV_EVENT_BUBBLE;
 }
 
-ZMK_LISTENER(skuratovich_key_rgb, position_listener);
-ZMK_SUBSCRIPTION(skuratovich_key_rgb, zmk_position_state_changed);
+ZMK_LISTENER(shared_key_rgb, position_listener);
+ZMK_SUBSCRIPTION(shared_key_rgb, zmk_position_state_changed);
 
 static int key_rgb_init(void) {
-    if (!device_is_ready(strip)) {
-        LOG_ERR("led strip not ready, per-key rgb off");
-        return -ENODEV;
-    }
     rng_state = k_cycle_get_32() ^ 0x9e3779b9u;
     if (rng_state == 0) {
         rng_state = 0x9e3779b9u;

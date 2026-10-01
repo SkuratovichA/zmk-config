@@ -13,8 +13,8 @@
 
 /* L8 is the smallest canvas format that sw_rotate supports on the nice!view. */
 #define SHARED_CANVAS_COLOR_FORMAT LV_COLOR_FORMAT_L8
-#define SHARED_CANVAS_BUF_SIZE(w, h)                                                                \
-    LV_CANVAS_BUF_SIZE((w), (h), LV_COLOR_FORMAT_GET_BPP(SHARED_CANVAS_COLOR_FORMAT),               \
+#define SHARED_CANVAS_BUF_SIZE(w, h)                                                               \
+    LV_CANVAS_BUF_SIZE((w), (h), LV_COLOR_FORMAT_GET_BPP(SHARED_CANVAS_COLOR_FORMAT),              \
                        LV_DRAW_BUF_STRIDE_ALIGN)
 
 #define LVGL_BACKGROUND                                                                            \

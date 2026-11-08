@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MIT
+
+description: Cycles the LED mode (off, underglow, per-key, both) on both halves
+
+compatible: "zmk,behavior-led-mode"
+
+include: zero_param.yaml

@@ -1,0 +1,201 @@
+/*
+ * Kyria — splitkb Kyria rev3, ZMK.
+ *
+ * Built for a friend who comes from ordinary keyboards. The alpha block, the
+ * layers and the thumb order follow the besimboard (Aurora Lily58); the number
+ * row lives on LOWER, and the two upper thumb keys of each half carry what the
+ * missing row and the narrower bottom row took away.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+#include <dt-bindings/zmk/rgb.h>
+#include <dt-bindings/zmk/ext_power.h>
+#include <dt-bindings/shared/clock.h>
+
+#define BASE  0
+#define LOWER 1
+#define FN    2
+#define SYS   3
+
+/* macOS shortcut */
+#define MAC_LOCK LC(LG(Q))
+
+/ {
+    behaviors {
+        // The clock of the OLED status screen: &clk CLK_SHOW, CLK_HOUR_INC, ...
+        // (include/dt-bindings/shared/clock.h). The driver is built on the left
+        // half only; on the right the key does nothing.
+        //
+        // The board has switches, not encoders, in the encoder positions, so
+        // there are no sensor-bindings here (see the end of this file).
+        clk: oled_clock {
+            compatible = "zmk,behavior-oled-clock";
+            #binding-cells = <1>;
+            display-name = "Clock";
+        };
+
+        // The LED mode key: off, underglow, per-key, both, on both halves.
+        led_mode: led_mode {
+            compatible = "zmk,behavior-led-mode";
+            #binding-cells = <0>;
+            display-name = "LED mode";
+        };
+    };
+
+    // LOWER and FN held together give SYS.
+    conditional_layers {
+        compatible = "zmk,conditional-layers";
+        sys_tri_layer {
+            if-layers = <LOWER FN>;
+            then-layer = <SYS>;
+        };
+    };
+
+    // LEDs. One chain of 31 per half: LEDs 0-5 are the underglow, 6-30 sit
+    // under the keys, from the thumb cluster up (order taken from QMK's rev3
+    // rgb_matrix). The chain is written through one frame (src/shared/led_frame.c):
+    // ZMK's underglow sees only the six underglow LEDs through the window below,
+    // the per-key effect (src/shared/key_rgb.c) lights a pressed key's LED in a
+    // random colour and fades it out. &led_mode cycles off, underglow, per-key,
+    // both.
+    led_frame {
+        compatible = "skuratovich,led-frame";
+        strip = <&led_strip>;
+    };
+
+    rgb_window: rgb_window {
+        compatible = "skuratovich,led-strip-window";
+        offset = <0>;
+        chain-length = <6>;
+    };
+
+    chosen {
+        zmk,underglow = &rgb_window;
+    };
+
+    // One entry per key in keymap order: the LED's index in the chain of the
+    // half that carries the key.
+    key_rgb {
+        compatible = "skuratovich,key-rgb";
+        key-leds = <
+            30 29 28 27 26 25                        25 26 27 28 29 30
+            24 23 22 21 20 19                        19 20 21 22 23 24
+            18 17 16 15 14 13 12 11            11 12 13 14 15 16 17 18
+                     10  9  8  7  6            6  7  8  9 10
+        >;
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        base_layer {
+            display-name = "BASE";
+            // ----------------------------------------------------------------------------------------------------
+            // |  ESC  | Q | W |  E   | R |  T  |                              | Y  |  U   |  I   | O | P |   \   |
+            // |  TAB  | A | S |  D   | F |  G  |                              | H  |  J   |  K   | L | ; |   '   |
+            // | SHIFT | Z | X |  C   | V |  B  |  -  |  =   |   |  [  |   ]   | N  |  M   |  ,   | . | / | ENTER |
+            //                 | CTRL | ` | OPT | CMD | BSPC |   | SPC | LOWER | FN | RALT | CAPS |
+            bindings = <
+&kp ESC         &kp Q  &kp W  &kp E      &kp R      &kp T                                                                &kp Y   &kp U          &kp I         &kp O    &kp P     &kp BACKSLASH
+&kp TAB         &kp A  &kp S  &kp D      &kp F      &kp G                                                                &kp H   &kp J          &kp K         &kp L    &kp SEMI  &kp SQT
+&kp LEFT_SHIFT  &kp Z  &kp X  &kp C      &kp V      &kp B     &kp MINUS         &kp EQUAL          &kp LBKT   &kp RBKT   &kp N   &kp M          &kp COMMA     &kp DOT  &kp FSLH  &kp ENTER
+                              &kp LCTRL  &kp GRAVE  &kp LALT  &kp LEFT_COMMAND  &kp BACKSPACE      &kp SPACE  &mo LOWER  &mo FN  &kp RIGHT_ALT  &kp CAPSLOCK
+            >;
+        };
+
+        lower_layer {
+            display-name = "LOWER";
+            // --------------------------------------------------------------------------------------
+            // | ` | 1 | 2 | 3 | 4 | 5 |                               |  6   | 7  | 8 | 9 | 0  | - |
+            // |   | ( | [ | ] | ) |   |                               |      | <- | v | ^ | -> | = |
+            // |   | ` |   |   |   |   | VOL- | VOL+ |   | MUTE | PLAY | CAPS | -  | = |   |    |   |
+            //             |   |   |   |      |      |   |      |      |      |    |   |
+            bindings = <
+&kp GRAVE  &kp N1     &kp N2    &kp N3    &kp N4    &kp N5                                                                &kp N6        &kp N7     &kp N8     &kp N9  &kp N0     &kp MINUS
+&trans     &kp LPAR   &kp LBKT  &kp RBKT  &kp RPAR  &trans                                                                &trans        &kp LEFT   &kp DOWN   &kp UP  &kp RIGHT  &kp EQUAL
+&trans     &kp GRAVE  &trans    &trans    &trans    &trans  &kp C_VOL_DN  &kp C_VOL_UP      &kp C_MUTE  &kp C_PLAY_PAUSE  &kp CAPSLOCK  &kp MINUS  &kp EQUAL  &trans  &trans     &trans
+                                &trans    &trans    &trans  &trans        &trans            &trans      &trans            &trans        &trans     &trans
+            >;
+        };
+
+        fn_layer {
+            display-name = "FN";
+            // -------------------------------------------------------------------------------------------------------------
+            // | LOCK | BT1 | BT2 | BT3 | BT4 | BT5 |                               | USB | BLE | TOG | UNLOCK |     |     |
+            // |  F1  |  F2 |  F3 |  F4 |  F5 |  F6 |                               |  F7 |  F8 |  F9 |  F10   | F11 | F12 |
+            // |      |     |     |     |     |     | BRI- | BRI+ |   | PREV | NEXT |     |     |     |        |     |     |
+            //                    |     |     |     |      | DEL  |   |      |      |     |     |     |
+            //
+            // BT1-5 select a Bluetooth profile, USB/BLE/TOG pick the output, UNLOCK opens
+            // the keyboard for ZMK Studio (zmk.studio, over USB or Bluetooth, left half).
+            // LOCK locks the Mac. FN + Backspace is Delete. The keys that can hurt (pairing,
+            // bootloader, reset, LEDs, clock) sit one layer further, on SYS.
+            bindings = <
+&kp MAC_LOCK  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                                                          &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &studio_unlock  &trans   &trans
+&kp F1        &kp F2        &kp F3        &kp F4        &kp F5        &kp F6                                                                &kp F7        &kp F8        &kp F9        &kp F10         &kp F11  &kp F12
+&trans        &trans        &trans        &trans        &trans        &trans        &kp C_BRI_DN  &kp C_BRI_UP      &kp C_PREV  &kp C_NEXT  &trans        &trans        &trans        &trans          &trans   &trans
+                                          &trans        &trans        &trans        &trans        &kp DEL           &trans      &trans      &trans        &trans        &trans
+            >;
+        };
+
+        sys_layer {
+            display-name = "SYS";
+            // ------------------------------------------------------------------------------------------------------
+            // |  BOOT  | x | H+ |   M+  | x | x |                   |  x   |  x   |  x   | UNLOCK |  x   |   BOOT  |
+            // | BT CLR | x | H- |   M-  | x | x |                   | LEDS | EFF+ | HUE+ |  SAT+  | LED+ | CLR ALL |
+            // | RESET  | x | x  | CLOCK | x | x | x | x |   | x | x | PWR  | EFF- | HUE- |  SAT-  | LED- |  RESET  |
+            //                   |       |   |   |   |   |   |   |   |      |      |      |
+            //
+            // Reached by holding LOWER and FN together. x does nothing, so a slip on this
+            // layer cannot reach the Bluetooth keys of FN.
+            // BOOT puts that half into the bootloader and RESET restarts that half; both act
+            // on the half where the key is. BT CLR forgets the pairing of the current
+            // profile, CLR ALL forgets all of them. LEDS cycles the LED mode on both halves:
+            // off, underglow only, per-key only (a pressed key lights up and fades),
+            // underglow and per-key. EFF, HUE, SAT and LED step the underglow's effect, hue,
+            // saturation and brightness up (home row) and down (the row below), on both
+            // halves. H+, H-, M+ and M- set the clock of the OLED,
+            // CLOCK shows it for a few seconds. PWR switches the 3.3 V rail that feeds the
+            // OLED and the LEDs back on if it was ever stored as off: press it, wait a
+            // minute for the setting to be saved, then RESET the left half so the OLED
+            // initialises again.
+            bindings = <
+&bootloader  &none  &clk CLK_HOUR_INC  &clk CLK_MIN_INC  &none   &none                                       &none             &none            &none            &studio_unlock   &none            &bootloader
+&bt BT_CLR   &none  &clk CLK_HOUR_DEC  &clk CLK_MIN_DEC  &none   &none                                       &led_mode         &rgb_ug RGB_EFF  &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &rgb_ug RGB_BRI  &bt BT_CLR_ALL
+&sys_reset   &none  &none              &clk CLK_SHOW     &none   &none   &none   &none       &none   &none   &ext_power EP_ON  &rgb_ug RGB_EFR  &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &rgb_ug RGB_BRD  &sys_reset
+                                       &trans            &trans  &trans  &trans  &trans      &trans  &trans  &trans            &trans           &trans
+            >;
+        };
+    };
+};
+
+/*
+ * RGB LEDs. A rev3 half carries 25 per-key LEDs and 6 underglow LEDs on one
+ * chain; the shield's default is 10. Extra entries are harmless on a half with
+ * fewer LEDs.
+ */
+&led_strip {
+    chain-length = <31>;
+};
+
+/*
+ * No encoders are fitted (switches sit in their positions), so the encoder
+ * nodes and the sensors node are switched off. Without this ZMK links in the
+ * EC11 driver and a sensor keymap for hardware that is not there.
+ */
+&left_encoder {
+    status = "disabled";
+};
+
+&right_encoder {
+    status = "disabled";
+};
+
+&sensors {
+    status = "disabled";
+};

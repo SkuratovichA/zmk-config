@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: MIT
+
+description: |
+  Reactive per-key RGB: a pressed key lights its LED in a random colour and
+  fades out. The node tells which LED of this half's strip (the chosen
+  zmk,underglow node) belongs to each key position of the keymap.
+
+compatible: "skuratovich,key-rgb"
+
+properties:
+  key-leds:
+    type: array
+    required: true
+    description: |
+      One entry per key position of the keymap, in keymap order: the index of
+      the key's LED in the chain of the half that carries the key, or 255 for a
+      key without an LED. Both halves read the same map and each half only looks
+      up its own keys.

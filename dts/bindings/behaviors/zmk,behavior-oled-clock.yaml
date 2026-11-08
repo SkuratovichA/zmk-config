@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MIT
+
+description: Clock control for the Kyria OLED status screen
+
+compatible: "zmk,behavior-oled-clock"
+
+include: one_param.yaml

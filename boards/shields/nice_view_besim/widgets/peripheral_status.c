@@ -42,7 +42,7 @@ static void draw_top(lv_obj_t *widget, const struct status_state *state) {
 
     lv_canvas_fill_bg(canvas, LVGL_BACKGROUND, LV_OPA_COVER);
 
-    draw_battery_row(canvas, 0, "R", state->battery, state->charging, true);
+    draw_battery_row(canvas, 0, 0, 24, "R", state->battery, state->charging, true);
 
     // Link to the central half
     canvas_draw_text(canvas, 0, 22, CANVAS_SIZE, &symbol_dsc,
@@ -68,7 +68,7 @@ static void draw_bottom(lv_obj_t *widget) {
 /* Battery -------------------------------------------------------------- */
 
 static void set_battery_status(struct zmk_widget_status *widget,
-                               struct battery_status_state state) {
+                               struct shared_battery_status_state state) {
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
     widget->state.charging = state.usb_present;
 #endif
@@ -76,13 +76,13 @@ static void set_battery_status(struct zmk_widget_status *widget,
     draw_top(widget->obj, &widget->state);
 }
 
-static void battery_status_update_cb(struct battery_status_state state) {
+static void battery_status_update_cb(struct shared_battery_status_state state) {
     struct zmk_widget_status *widget;
     SYS_SLIST_FOR_EACH_CONTAINER(&widgets, widget, node) { set_battery_status(widget, state); }
 }
 
-static struct battery_status_state battery_status_get_state(const zmk_event_t *eh) {
-    return (struct battery_status_state){
+static struct shared_battery_status_state battery_status_get_state(const zmk_event_t *eh) {
+    return (struct shared_battery_status_state){
         .level = zmk_battery_state_of_charge(),
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)
         .usb_present = zmk_usb_is_powered(),
@@ -90,7 +90,7 @@ static struct battery_status_state battery_status_get_state(const zmk_event_t *e
     };
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct battery_status_state,
+ZMK_DISPLAY_WIDGET_LISTENER(widget_battery_status, struct shared_battery_status_state,
                             battery_status_update_cb, battery_status_get_state)
 ZMK_SUBSCRIPTION(widget_battery_status, zmk_battery_state_changed);
 #if IS_ENABLED(CONFIG_USB_DEVICE_STACK)

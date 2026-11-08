@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: MIT
+
+description: |
+  The LED frame of this half: the one writer of the physical LED chain. ZMK's
+  underglow (through a skuratovich,led-strip-window) and the per-key effect
+  write their pixels into it.
+
+compatible: "skuratovich,led-frame"
+
+properties:
+  strip:
+    type: phandle
+    required: true
+    description: The physical LED strip (the WS2812 chain).
